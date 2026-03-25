@@ -34,7 +34,7 @@ dependencies:
   reorderables: ^0.6.0
   dynamic_color: ^1.8.1
   path_provider: ^2.1.5
-  json_annotation: ^4.9.0
+  json_annotation: ^4.11.0
   flutter_timezone: ^5.0.2
   device_info_plus: ^12.3.0
   package_info_plus: ^9.0.0
@@ -51,8 +51,8 @@ dependencies:
   scrollable_positioned_list: ^0.3.8
   flutter_local_notifications: ^21.0.0
   internet_connection_checker_plus: ^2.9.1+2
-  isar_community: ^3.3.1
-  isar_community_flutter_libs: ^3.3.1
+  isar_community: ^3.3.2
+  isar_community_flutter_libs: ^3.3.2
 
 # Uncomment this for publishing FLOSS variant
 # dependency_overrides:
@@ -65,13 +65,13 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  freezed: ^3.2.3
+  freezed: ^3.2.5
   build_runner: ^2.13.1
   flutter_lints: ^6.0.0
-  json_serializable: ^6.11.2
+  json_serializable: ^6.13.1
   flutter_native_splash: ^2.4.7
   flutter_launcher_icons: ^0.14.4
-  isar_community_generator: ^3.3.1
+  isar_community_generator: ^3.3.2
 
 flutter_launcher_icons:
   android: true
