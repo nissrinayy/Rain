@@ -113,7 +113,7 @@ Future<void> initializeApp() async {
     Workmanager().initialize(callbackDispatcher);
     HomeWidget.setAppGroupId(appGroupId);
   }
-  DeviceFeature().init();
+  await DeviceFeature().init();
 }
 
 void setupConnectivityListener() => Connectivity().onConnectivityChanged.listen(

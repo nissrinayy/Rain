@@ -13,7 +13,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = 'com.yoshi.rain'
     compileSdk = 36
-    ndkVersion = '30.0.14904198'
+    ndkVersion = '29.0.14206865'
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
