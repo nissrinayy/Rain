@@ -52,9 +52,9 @@ class WeatherController extends GetxController {
   final cacheExpiry = DateTime.now().subtract(const Duration(hours: 12));
 
   @override
-  void onInit() {
+  void onInit() async {
     weatherCards.assignAll(
-      isar.weatherCards.where().sortByIndex().findAllSync(),
+      await isar.weatherCards.where().sortByIndex().findAll(),
     );
     super.onInit();
   }
@@ -80,7 +80,7 @@ class WeatherController extends GetxController {
     if (settings.location) {
       await getCurrentLocation();
     } else {
-      final locationCity = isar.locationCaches.where().findFirstSync();
+      final locationCity = await isar.locationCaches.where().findFirst();
       if (locationCity != null) {
         await getLocation(
           locationCity.lat!,
@@ -94,21 +94,21 @@ class WeatherController extends GetxController {
 
   Future<void> getCurrentLocation() async {
     if (!(await isOnline.value)) {
-      showSnackBar(content: 'no_inter'.tr);
+      showSnackBar('no_inter'.tr);
       await readCache();
       return;
     }
 
     if (!await Geolocator.isLocationServiceEnabled()) {
       showSnackBar(
-        content: 'no_location'.tr,
+        'no_location'.tr,
         onPressed: () => Geolocator.openLocationSettings(),
       );
       await readCache();
       return;
     }
 
-    if (isar.mainWeatherCaches.where().findAllSync().isNotEmpty) {
+    if ((await isar.mainWeatherCaches.where().findAll()).isNotEmpty) {
       await readCache();
       return;
     }
@@ -137,12 +137,12 @@ class WeatherController extends GetxController {
 
   Future<Map<String, dynamic>> getCurrentLocationSearch() async {
     if (!(await isOnline.value)) {
-      showSnackBar(content: 'no_inter'.tr);
+      showSnackBar('no_inter'.tr);
     }
 
     if (!await Geolocator.isLocationServiceEnabled()) {
       showSnackBar(
-        content: 'no_location'.tr,
+        'no_location'.tr,
         onPressed: () => Geolocator.openLocationSettings(),
       );
     }
@@ -169,12 +169,12 @@ class WeatherController extends GetxController {
     String locality,
   ) async {
     if (!(await isOnline.value)) {
-      showSnackBar(content: 'no_inter'.tr);
+      showSnackBar('no_inter'.tr);
       await readCache();
       return;
     }
 
-    if (isar.mainWeatherCaches.where().findAllSync().isNotEmpty) {
+    if ((await isar.mainWeatherCaches.where().findAll()).isNotEmpty) {
       await readCache();
       return;
     }
@@ -195,10 +195,12 @@ class WeatherController extends GetxController {
   }
 
   Future<void> readCache() async {
-    MainWeatherCache? mainWeatherCache = isar.mainWeatherCaches
+    MainWeatherCache? mainWeatherCache = await isar.mainWeatherCaches
         .where()
-        .findFirstSync();
-    LocationCache? locationCache = isar.locationCaches.where().findFirstSync();
+        .findFirst();
+    LocationCache? locationCache = await isar.locationCaches
+        .where()
+        .findFirst();
 
     if (mainWeatherCache == null || locationCache == null) {
       isLoading.value = false;
@@ -251,12 +253,12 @@ class WeatherController extends GetxController {
       district: _district.value,
     );
 
-    isar.writeTxnSync(() {
-      if (isar.mainWeatherCaches.where().findAllSync().isEmpty) {
-        isar.mainWeatherCaches.putSync(_mainWeather.value);
+    await isar.writeTxn(() async {
+      if ((await isar.mainWeatherCaches.where().findAll()).isEmpty) {
+        await isar.mainWeatherCaches.put(_mainWeather.value);
       }
-      if (isar.locationCaches.where().findAllSync().isEmpty) {
-        isar.locationCaches.putSync(locationCaches);
+      if ((await isar.locationCaches.where().findAll()).isEmpty) {
+        await isar.locationCaches.put(locationCaches);
       }
     });
   }
@@ -266,13 +268,13 @@ class WeatherController extends GetxController {
       return;
     }
 
-    isar.writeTxnSync(
+    await isar.writeTxn(
       () => isar.mainWeatherCaches
           .filter()
           .timestampLessThan(cacheExpiry)
-          .deleteAllSync(),
+          .deleteAll(),
     );
-    if (isar.mainWeatherCaches.where().findAllSync().isEmpty) {
+    if ((await isar.mainWeatherCaches.where().findAll()).isEmpty) {
       await flutterLocalNotificationsPlugin.cancelAll();
     }
   }
@@ -285,13 +287,13 @@ class WeatherController extends GetxController {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     await flutterLocalNotificationsPlugin.cancelAll();
 
-    isar.writeTxnSync(() {
+    await isar.writeTxn(() async {
       if (!settings.location) {
-        isar.mainWeatherCaches.where().deleteAllSync();
+        await isar.mainWeatherCaches.where().deleteAll();
       }
       if (settings.location && serviceEnabled || changeCity) {
-        isar.mainWeatherCaches.where().deleteAllSync();
-        isar.locationCaches.where().deleteAllSync();
+        await isar.mainWeatherCaches.where().deleteAll();
+        await isar.locationCaches.where().deleteAll();
       }
     });
   }
@@ -303,7 +305,7 @@ class WeatherController extends GetxController {
     String district,
   ) async {
     if (!(await isOnline.value)) {
-      showSnackBar(content: 'no_inter'.tr);
+      showSnackBar('no_inter'.tr);
       return;
     }
 
@@ -315,9 +317,9 @@ class WeatherController extends GetxController {
       district,
       tz,
     );
-    isar.writeTxnSync(() {
+    isar.writeTxn(() async {
       weatherCards.add(_weatherCard.value);
-      isar.weatherCards.putSync(_weatherCard.value);
+      await isar.weatherCards.put(_weatherCard.value);
     });
   }
 
@@ -329,7 +331,7 @@ class WeatherController extends GetxController {
     String district,
   ) async {
     if (!(await isOnline.value)) {
-      showSnackBar(content: 'no_inter'.tr);
+      showSnackBar('no_inter'.tr);
       return;
     }
 
@@ -342,7 +344,7 @@ class WeatherController extends GetxController {
       tz,
     );
 
-    isar.writeTxnSync(() {
+    await isar.writeTxn(() async {
       card.lat = latitude;
       card.lon = longitude;
       card.city = city;
@@ -350,7 +352,7 @@ class WeatherController extends GetxController {
       card.timezone = tz;
 
       _updateWeatherCard(card, updatedCard);
-      isar.weatherCards.putSync(card);
+      await isar.weatherCards.put(card);
     });
 
     weatherCards.refresh();
@@ -358,12 +360,12 @@ class WeatherController extends GetxController {
 
   Future<void> updateCacheCard(bool refresh) async {
     final weatherCard = refresh
-        ? isar.weatherCards.where().sortByIndex().findAllSync()
-        : isar.weatherCards
+        ? await isar.weatherCards.where().sortByIndex().findAll()
+        : await isar.weatherCards
               .filter()
               .timestampLessThan(cacheExpiry)
               .sortByIndex()
-              .findAllSync();
+              .findAll();
 
     if (!(await isOnline.value) || weatherCard.isEmpty) {
       return;
@@ -377,14 +379,17 @@ class WeatherController extends GetxController {
         oldCard.district!,
         oldCard.timezone!,
       );
-      isar.writeTxnSync(() {
+      await isar.writeTxn(() async {
         _updateWeatherCard(oldCard, updatedCard);
         weatherCards.refresh();
       });
     }
   }
 
-  void _updateWeatherCard(WeatherCard oldCard, WeatherCard updatedCard) {
+  Future<void> _updateWeatherCard(
+    WeatherCard oldCard,
+    WeatherCard updatedCard,
+  ) async {
     oldCard
       ..time = updatedCard.time
       ..weathercode = updatedCard.weathercode
@@ -421,7 +426,7 @@ class WeatherController extends GetxController {
       ..winddirection10MDominant = updatedCard.winddirection10MDominant
       ..timestamp = DateTime.now();
 
-    isar.weatherCards.putSync(oldCard);
+    await isar.weatherCards.put(oldCard);
   }
 
   Future<void> updateCard(WeatherCard weatherCard) async {
@@ -437,14 +442,13 @@ class WeatherController extends GetxController {
       weatherCard.timezone!,
     );
 
-    isar.writeTxnSync(() => _updateWeatherCard(weatherCard, updatedCard));
+    await isar.writeTxn(() => _updateWeatherCard(weatherCard, updatedCard));
   }
 
-  Future<void> deleteCardWeather(WeatherCard weatherCard) async =>
-      await isar.writeTxnSync(() {
-        weatherCards.remove(weatherCard);
-        isar.weatherCards.deleteSync(weatherCard.id);
-      });
+  Future<void> deleteCardWeather(WeatherCard weatherCard) async {
+    weatherCards.remove(weatherCard);
+    await isar.writeTxn(() => isar.weatherCards.delete(weatherCard.id));
+  }
 
   int getTime(List<String> time, String timezone) => time.indexWhere((t) {
     final dateTime = DateTime.parse(t);
@@ -539,7 +543,7 @@ class WeatherController extends GetxController {
     }
   }
 
-  void reorder(int oldIndex, int newIndex) {
+  Future<void> reorder(int oldIndex, int newIndex) async {
     if (newIndex > oldIndex) {
       newIndex -= 1;
     }
@@ -549,13 +553,13 @@ class WeatherController extends GetxController {
     for (int i = 0; i < weatherCards.length; i++) {
       final item = weatherCards[i];
       item.index = i;
-      isar.writeTxnSync(() => isar.weatherCards.putSync(item));
+      await isar.writeTxn(() => isar.weatherCards.put(item));
     }
   }
 
   Future<bool> updateWidgetBackgroundColor(String color) async {
     settings.widgetBackgroundColor = color;
-    isar.writeTxnSync(() => isar.settings.putSync(settings));
+    await isar.writeTxn(() => isar.settings.put(settings));
 
     final results = await Future.wait<bool?>([
       HomeWidget.saveWidgetData('background_color', color),
@@ -566,7 +570,7 @@ class WeatherController extends GetxController {
 
   Future<bool> updateWidgetTextColor(String color) async {
     settings.widgetTextColor = color;
-    isar.writeTxnSync(() => isar.settings.putSync(settings));
+    await isar.writeTxn(() => isar.settings.put(settings));
 
     final results = await Future.wait<bool?>([
       HomeWidget.saveWidgetData('text_color', color),
@@ -587,9 +591,9 @@ class WeatherController extends GetxController {
       WeatherCardSchema,
     ], directory: (await getApplicationSupportDirectory()).path);
 
-    final mainWeatherCache = isarWidget.mainWeatherCaches
+    final mainWeatherCache = await isarWidget.mainWeatherCaches
         .where()
-        .findFirstSync();
+        .findFirst();
     if (mainWeatherCache == null) return false;
 
     final hour = getTime(mainWeatherCache.time!, mainWeatherCache.timezone!);

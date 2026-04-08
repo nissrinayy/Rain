@@ -11,6 +11,15 @@ class GaIe {
     'description3':
         'Má tá fadhb ar bith agat, déan teagmháil linn trí Ríomhphost nó trí phlé an aip.',
     'next': 'Ar Aghaidh',
+    'skip': 'Scipeáil',
+    'editCityHint': 'Cuir eolas na cathrach in eagar',
+    'createCityHint': 'Cuardaigh nó cuir sonraí cathrach isteach de láimh',
+    'unsavedChanges': 'Athruithe neamhshábháilte',
+    'discardChanges':
+        'An bhfuil tú cinnte go bhfuil tú ag iarraidh d\'athruithe a chaitheamh?',
+    'discard': 'Caith',
+    'save': 'Sábháil',
+    'ready': 'Réidh',
     'search': 'Cuardaigh...',
     'loading': 'Ag Lódáil...',
     'searchCity': 'Aimsigh do chathair',
@@ -129,6 +138,7 @@ class GaIe {
     'searchMethod': 'Úsáid ceangal nó geolocáid',
     'done': 'Críochnaithe',
     'groups': 'Ár ngrúpaí',
+    'aboutApp': 'Faoi an aip',
     'openMeteo': 'Sonraí ó Open-Meteo (CC-BY 4.0)',
     'hourlyVariables': 'Athrógacha aimsire uaireanta',
     'dailyVariables': 'Athrógacha aimsire laethúla',

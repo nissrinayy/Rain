@@ -61,33 +61,32 @@ ThemeData _buildTheme({
     textTheme: GoogleFonts.ubuntuTextTheme(baseTheme.textTheme),
     appBarTheme: _buildAppBarTheme(
       color,
-      baseTheme.colorScheme.onSurface,
+      harmonizedColorScheme,
       edgeToEdgeAvailable,
       brightness,
-      harmonizedColorScheme,
     ),
     primaryColor: color,
     canvasColor: color,
     scaffoldBackgroundColor: color,
+    chipTheme: _buildChipTheme(color, harmonizedColorScheme),
     cardTheme: _buildCardTheme(color, harmonizedColorScheme),
     bottomSheetTheme: _buildBottomSheetTheme(color, harmonizedColorScheme),
     navigationRailTheme: baseTheme.navigationRailTheme.copyWith(
       backgroundColor: color,
     ),
     navigationBarTheme: _buildNavigationBarTheme(color, harmonizedColorScheme),
-    inputDecorationTheme: _buildInputDecorationTheme(),
+    inputDecorationTheme: _buildInputDecorationTheme(baseTheme),
   );
 }
 
 AppBarTheme _buildAppBarTheme(
   Color? color,
-  Color? onSurfaceColor,
+  ColorScheme? colorScheme,
   bool edgeToEdgeAvailable,
   Brightness brightness,
-  ColorScheme? colorScheme,
 ) => AppBarTheme(
   backgroundColor: color,
-  foregroundColor: onSurfaceColor,
+  foregroundColor: colorScheme?.onSurface,
   shadowColor: Colors.transparent,
   surfaceTintColor: Colors.transparent,
   elevation: 0,
@@ -107,6 +106,17 @@ AppBarTheme _buildAppBarTheme(
         : colorScheme?.surface,
   ),
 );
+
+ChipThemeData _buildChipTheme(Color? color, ColorScheme? colorScheme) =>
+    ChipThemeData(
+      side: BorderSide.none,
+      backgroundColor: Colors.transparent,
+      surfaceTintColor: color == oledColor
+          ? Colors.transparent
+          : colorScheme?.surfaceTint,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      shadowColor: Colors.transparent,
+    );
 
 CardThemeData _buildCardTheme(Color? color, ColorScheme? colorScheme) =>
     CardThemeData(
@@ -136,13 +146,22 @@ NavigationBarThemeData _buildNavigationBarTheme(
   surfaceTintColor: color == oledColor
       ? Colors.transparent
       : colorScheme?.surfaceTint,
+  labelTextStyle: WidgetStateProperty.all(
+    const TextStyle(overflow: TextOverflow.ellipsis, fontSize: 12),
+  ),
 );
 
-InputDecorationTheme _buildInputDecorationTheme() => InputDecorationTheme(
-  labelStyle: WidgetStateTextStyle.resolveWith(
-    (Set<WidgetState> states) => const TextStyle(fontSize: 14),
-  ),
-  border: InputBorder.none,
-  focusedBorder: InputBorder.none,
-  enabledBorder: InputBorder.none,
-);
+InputDecorationTheme _buildInputDecorationTheme(ThemeData baseTheme) =>
+    InputDecorationTheme(
+      labelStyle: WidgetStateTextStyle.resolveWith(
+        (Set<WidgetState> states) => const TextStyle(fontSize: 14),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: BorderSide(color: baseTheme.disabledColor),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: BorderSide(color: baseTheme.disabledColor),
+      ),
+    );

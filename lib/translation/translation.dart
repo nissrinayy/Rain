@@ -5,6 +5,7 @@ import 'package:rain/translation/bn_in.dart';
 import 'package:rain/translation/cs_cz.dart';
 import 'package:rain/translation/da_dk.dart';
 import 'package:rain/translation/de_de.dart';
+import 'package:rain/translation/el_gr.dart';
 import 'package:rain/translation/en_us.dart';
 import 'package:rain/translation/es_es.dart';
 import 'package:rain/translation/fa_ir.dart';
@@ -41,6 +42,7 @@ class Translation extends Translations {
   Map<String, Map<String, String>> get keys => {
     'ar_SA': ArSa().messages,
     'as_IN': AsIn().messages,
+    'el_GR': ElGr().messages,
     'ru_RU': RuRu().messages,
     'en_US': EnUs().messages,
     'fr_FR': FrFr().messages,

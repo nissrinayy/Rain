@@ -11,6 +11,15 @@ class FrFr {
     'description3':
         'Si vous rencontrez des problèmes, veuillez nous contacter par e-mail ou dans les avis de l\'application.',
     'next': 'Suivant',
+    'skip': 'Ignorer',
+    'editCityHint': 'Modifier les informations de la ville',
+    'createCityHint':
+        'Recherchez ou saisissez manuellement les données de la ville',
+    'unsavedChanges': 'Modifications non enregistrées',
+    'discardChanges': 'Êtes-vous sûr de vouloir annuler vos modifications ?',
+    'discard': 'Annuler',
+    'save': 'Enregistrer',
+    'ready': 'Prêt',
     'search': 'Rechercher...',
     'loading': 'Chargement...',
     'searchCity': 'Trouver votre ville',
@@ -129,6 +138,7 @@ class FrFr {
     'searchMethod': 'Utilisez la recherche ou la géolocalisation',
     'done': 'Terminé',
     'groups': 'Nos groupes',
+    'aboutApp': 'À propos de l\'app',
     'openMeteo': 'Données de Open-Meteo (CC-BY 4.0)',
     'hourlyVariables': 'Variables météorologiques horaires',
     'dailyVariables': 'Variables météorologiques quotidiennes',

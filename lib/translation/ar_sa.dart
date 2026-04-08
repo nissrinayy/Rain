@@ -10,6 +10,14 @@ class ArSa {
     'description3':
         'إذا واجهت أي مشاكل، يرجى الاتصال بنا عبر البريد الإلكتروني أو في مراجعات التطبيق.',
     'next': 'التالي',
+    'skip': 'تخطي',
+    'editCityHint': 'تحرير معلومات المدينة',
+    'createCityHint': 'ابحث أو أدخل بيانات المدينة يدويًا',
+    'unsavedChanges': 'تغييرات غير محفوظة',
+    'discardChanges': 'هل أنت متأكد من أنك تريد تجاهل تغييراتك؟',
+    'discard': 'تجاهل',
+    'save': 'حفظ',
+    'ready': 'جاهز',
     'search': 'بحث...',
     'loading': 'جاري التحميل...',
     'searchCity': 'ابحث عن مدينتك',
@@ -127,6 +135,7 @@ class ArSa {
     'searchMethod': 'استخدم البحث أو تحديد الموقع الجغرافي',
     'done': 'تم',
     'groups': 'مجموعاتنا',
+    'aboutApp': 'حول التطبيق',
     'openMeteo': 'البيانات من Open-Meteo (CC-BY 4.0)',
     'hourlyVariables': 'متغيرات الطقس بالساعة',
     'dailyVariables': 'متغيرات الطقس اليومية',
@@ -138,5 +147,6 @@ class ArSa {
     'addWidget': 'إضافة أداة',
     'hideMap': 'إخفاء الخريطة',
     'edit': 'تحرير',
+    'no_desc_data': 'لا توجد بيانات',
   };
 }

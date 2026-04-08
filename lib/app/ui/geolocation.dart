@@ -11,6 +11,7 @@ import 'package:rain/app/api/city_api.dart';
 import 'package:rain/app/controller/controller.dart';
 import 'package:rain/app/ui/home.dart';
 import 'package:rain/app/ui/widgets/button.dart';
+import 'package:rain/app/ui/widgets/confirmation_dialog.dart';
 import 'package:rain/app/ui/widgets/text_form.dart';
 import 'package:rain/main.dart';
 
@@ -216,34 +217,16 @@ class _SelectGeolocationState extends State<SelectGeolocation> {
     setState(() => isLoading = false);
   }
 
-  Future<void> _showLocationDialog() async => await showAdaptiveDialog(
-    context: context,
-    builder: (BuildContext context) => AlertDialog.adaptive(
-      title: Text('location'.tr, style: context.textTheme.titleLarge),
-      content: Text('no_location'.tr, style: context.textTheme.titleMedium),
-      actions: [
-        TextButton(
-          onPressed: () => Get.back(result: false),
-          child: Text(
-            'cancel'.tr,
-            style: context.textTheme.titleMedium?.copyWith(
-              color: Colors.blueAccent,
-            ),
-          ),
-        ),
-        TextButton(
-          onPressed: () {
-            Geolocator.openLocationSettings();
-            Get.back(result: true);
-          },
-          child: Text(
-            'settings'.tr,
-            style: context.textTheme.titleMedium?.copyWith(color: Colors.green),
-          ),
-        ),
-      ],
-    ),
-  );
+  Future<void> _showLocationDialog() async {
+    await showConfirmationDialog(
+      context: context,
+      title: 'location'.tr,
+      message: 'no_location'.tr,
+      icon: IconsaxPlusBold.location,
+      confirmText: 'settings'.tr,
+      onConfirm: () => Geolocator.openLocationSettings(),
+    );
+  }
 
   Widget _buildLatitudeField() => MyTextForm(
     elevation: kTextFieldElevation,
@@ -286,7 +269,7 @@ class _SelectGeolocationState extends State<SelectGeolocation> {
 
   Widget _buildSubmitButton() => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-    child: MyTextButton(buttonName: 'done'.tr, onPressed: _handleSubmit),
+    child: MyTextButton(text: 'done'.tr, onPressed: _handleSubmit),
   );
 
   String? _validateLatitude(String? value) {

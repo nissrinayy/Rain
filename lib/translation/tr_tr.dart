@@ -11,6 +11,15 @@ class TrTr {
     'description3':
         'Herhangi bir sorunla karşılaşırsanız, lütfen bize e-posta veya uygulama yorumları aracılığıyla ulaşın.',
     'next': 'Devam',
+    'skip': 'Geç',
+    'editCityHint': 'Şehir bilgilerini düzenle',
+    'createCityHint': 'Şehir verilerini arayın veya manuel girin',
+    'unsavedChanges': 'Kaydedilmemiş değişiklikler',
+    'discardChanges':
+        'Değişikliklerinizi iptal etmek istediğinizden emin misiniz?',
+    'discard': 'İptal',
+    'save': 'Kaydet',
+    'ready': 'Hazır',
     'search': 'Arayış...',
     'loading': 'Yükleniyor...',
     'searchCity': 'Şehrinizi bulun',
@@ -127,6 +136,7 @@ class TrTr {
     'searchMethod': 'Arama veya konum belirleme kullanın',
     'done': 'Tamam',
     'groups': 'Gruplarımız',
+    'aboutApp': 'Uygulama hakkında',
     'openMeteo': 'Open-Meteo\'dan veriler (CC-BY 4.0)',
     'hourlyVariables': 'Saatlik hava değişkenleri',
     'dailyVariables': 'Günlük hava değişkenleri',

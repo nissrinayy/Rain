@@ -231,6 +231,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           labelText: 'search'.tr,
           type: TextInputType.text,
           icon: const Icon(IconsaxPlusLinear.global_search),
+          variant: TextFieldVariant.card,
           controller: _controllerSearch,
           margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
           focusNode: _focusNode,

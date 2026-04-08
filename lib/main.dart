@@ -17,6 +17,7 @@ import 'package:rain/app/data/db.dart';
 import 'package:rain/app/ui/geolocation.dart';
 import 'package:rain/app/ui/home.dart';
 import 'package:rain/app/ui/onboarding.dart';
+import 'package:rain/app/utils/snackbar_overlay.dart';
 import 'package:rain/theme/theme.dart';
 import 'package:rain/theme/theme_controller.dart';
 import 'package:rain/translation/translation.dart';
@@ -57,6 +58,7 @@ const List<Map<String, dynamic>> appLanguages = [
   {'name': 'Čeština', 'locale': Locale('cs', 'CZ')},
   {'name': 'Dansk', 'locale': Locale('da', 'DK')},
   {'name': 'Deutsch', 'locale': Locale('de', 'DE')},
+  {'name': 'Ελληνικά', 'locale': Locale('el', 'GR')},
   {'name': 'English', 'locale': Locale('en', 'US')},
   {'name': 'Español', 'locale': Locale('es', 'ES')},
   {'name': 'Français', 'locale': Locale('fr', 'FR')},
@@ -133,18 +135,18 @@ Future<void> initializeIsar() async {
     LocationCacheSchema,
     WeatherCardSchema,
   ], directory: (await getApplicationSupportDirectory()).path);
-  settings = isar.settings.where().findFirstSync() ?? Settings();
+  settings = await isar.settings.where().findFirst() ?? Settings();
   locationCache =
-      isar.locationCaches.where().findFirstSync() ?? LocationCache();
+      await isar.locationCaches.where().findFirst() ?? LocationCache();
 
   if (settings.language == null) {
     settings.language = '${Get.deviceLocale}';
-    isar.writeTxnSync(() => isar.settings.putSync(settings));
+    await isar.writeTxn(() => isar.settings.put(settings));
   }
 
   if (settings.theme == null) {
     settings.theme = 'system';
-    isar.writeTxnSync(() => isar.settings.putSync(settings));
+    await isar.writeTxn(() => isar.settings.put(settings));
   }
 }
 
@@ -337,6 +339,9 @@ class _MyAppState extends State<MyApp> {
                       : const HomePage()
                 : const OnBoarding(),
             title: 'Rain',
+            builder: (context, child) {
+              return Stack(children: [child!, const SnackBarOverlayWidget()]);
+            },
           );
         },
       ),

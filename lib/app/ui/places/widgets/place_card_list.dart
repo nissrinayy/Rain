@@ -5,6 +5,8 @@ import 'package:rain/app/controller/controller.dart';
 import 'package:rain/app/data/db.dart';
 import 'package:rain/app/ui/places/view/place_info.dart';
 import 'package:rain/app/ui/places/widgets/place_card.dart';
+import 'package:rain/app/ui/widgets/confirmation_dialog.dart';
+import 'package:reorderables/reorderables.dart';
 
 class PlaceCardList extends StatefulWidget {
   const PlaceCardList({super.key, required this.searchCity});
@@ -19,24 +21,12 @@ class _PlaceCardListState extends State<PlaceCardList> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = context.textTheme;
-    final titleMedium = textTheme.titleMedium;
-
     final weatherCards = _filterWeatherCards(
       weatherController.weatherCards,
       widget.searchCity,
     );
 
-    return ReorderableListView(
-      onReorder: (oldIndex, newIndex) =>
-          weatherController.reorder(oldIndex, newIndex),
-      children: _buildWeatherCardList(
-        weatherCards,
-        context,
-        textTheme,
-        titleMedium,
-      ),
-    );
+    return CustomScrollView(slivers: [_buildReorderableList(weatherCards)]);
   }
 
   List<WeatherCard> _filterWeatherCards(
@@ -45,42 +35,33 @@ class _PlaceCardListState extends State<PlaceCardList> {
   ) => weatherCards
       .where(
         (weatherCard) =>
-            (searchCity.isEmpty ||
-            weatherCard.city!.toLowerCase().contains(searchCity)),
+            searchCity.isEmpty ||
+            weatherCard.city!.toLowerCase().contains(searchCity),
       )
       .toList();
 
-  List<Widget> _buildWeatherCardList(
-    List<WeatherCard> weatherCards,
-    BuildContext context,
-    TextTheme textTheme,
-    TextStyle? titleMedium,
-  ) => weatherCards
-      .map(
-        (weatherCardList) => _buildDismissibleCard(
-          context,
-          weatherCardList,
-          textTheme,
-          titleMedium,
-        ),
-      )
-      .toList();
+  Widget _buildReorderableList(List<WeatherCard> weatherCards) {
+    return ReorderableSliverList(
+      delegate: ReorderableSliverChildBuilderDelegate(
+        (context, index) => _buildDismissibleCard(context, weatherCards[index]),
+        childCount: weatherCards.length,
+      ),
+      onReorder: (oldIndex, newIndex) async {
+        await weatherController.reorder(oldIndex, newIndex);
+      },
+    );
+  }
 
-  Widget _buildDismissibleCard(
-    BuildContext context,
-    WeatherCard weatherCardList,
-    TextTheme textTheme,
-    TextStyle? titleMedium,
-  ) => Dismissible(
-    key: ValueKey(weatherCardList),
-    direction: DismissDirection.endToStart,
-    background: _buildDismissibleBackground(),
-    confirmDismiss: (DismissDirection direction) =>
-        _showDeleteConfirmationDialog(context, textTheme, titleMedium),
-    onDismissed: (DismissDirection direction) async =>
-        await weatherController.deleteCardWeather(weatherCardList),
-    child: _buildCardGestureDetector(weatherCardList),
-  );
+  Widget _buildDismissibleCard(BuildContext context, WeatherCard weatherCard) =>
+      Dismissible(
+        key: ValueKey(weatherCard.id),
+        direction: DismissDirection.endToStart,
+        background: _buildDismissibleBackground(),
+        confirmDismiss: (_) => _showDeleteConfirmationDialog(context),
+        onDismissed: (_) async =>
+            await weatherController.deleteCardWeather(weatherCard),
+        child: _buildCardGestureDetector(context, weatherCard),
+      );
 
   Widget _buildDismissibleBackground() => Container(
     alignment: Alignment.centerRight,
@@ -90,50 +71,32 @@ class _PlaceCardListState extends State<PlaceCardList> {
     ),
   );
 
-  Future<bool> _showDeleteConfirmationDialog(
+  Future<bool> _showDeleteConfirmationDialog(BuildContext context) =>
+      showDeleteConfirmation(
+        context: context,
+        title: 'deletedCardWeather',
+        message: 'deletedCardWeatherQuery',
+        onConfirm: () => Get.back(result: true),
+      );
+
+  Widget _buildCardGestureDetector(
     BuildContext context,
-    TextTheme textTheme,
-    TextStyle? titleMedium,
-  ) async => await showAdaptiveDialog(
-    context: context,
-    builder: (BuildContext context) => AlertDialog.adaptive(
-      title: Text('deletedCardWeather'.tr, style: textTheme.titleLarge),
-      content: Text('deletedCardWeatherQuery'.tr, style: titleMedium),
-      actions: [
-        TextButton(
-          onPressed: () => Get.back(result: false),
-          child: Text(
-            'cancel'.tr,
-            style: titleMedium?.copyWith(color: Colors.blueAccent),
-          ),
-        ),
-        TextButton(
-          onPressed: () => Get.back(result: true),
-          child: Text(
-            'delete'.tr,
-            style: titleMedium?.copyWith(color: Colors.red),
-          ),
-        ),
-      ],
+    WeatherCard weatherCard,
+  ) => GestureDetector(
+    onTap: () => Get.to(
+      () => PlaceInfo(weatherCard: weatherCard),
+      transition: Transition.downToUp,
+    ),
+    child: PlaceCard(
+      time: weatherCard.time!,
+      timeDaily: weatherCard.timeDaily!,
+      timeDay: weatherCard.sunrise!,
+      timeNight: weatherCard.sunset!,
+      weather: weatherCard.weathercode!,
+      degree: weatherCard.temperature2M!,
+      district: weatherCard.district!,
+      city: weatherCard.city!,
+      timezone: weatherCard.timezone!,
     ),
   );
-
-  Widget _buildCardGestureDetector(WeatherCard weatherCardList) =>
-      GestureDetector(
-        onTap: () => Get.to(
-          () => PlaceInfo(weatherCard: weatherCardList),
-          transition: Transition.downToUp,
-        ),
-        child: PlaceCard(
-          time: weatherCardList.time!,
-          timeDaily: weatherCardList.timeDaily!,
-          timeDay: weatherCardList.sunrise!,
-          timeNight: weatherCardList.sunset!,
-          weather: weatherCardList.weathercode!,
-          degree: weatherCardList.temperature2M!,
-          district: weatherCardList.district!,
-          city: weatherCardList.city!,
-          timezone: weatherCardList.timezone!,
-        ),
-      );
 }

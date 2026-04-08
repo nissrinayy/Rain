@@ -12,7 +12,6 @@ import 'package:rain/app/ui/geolocation.dart';
 import 'package:rain/app/ui/main/view/main_page.dart';
 import 'package:rain/app/ui/map/view/map.dart';
 import 'package:rain/app/ui/settings/view/settings.dart';
-import 'package:rain/app/utils/show_snack_bar.dart';
 import 'package:rain/main.dart';
 
 class HomePage extends StatefulWidget {
@@ -25,6 +24,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int tabIndex = 0;
   bool visible = false;
+  bool _hasLocationCache = false;
   final _focusNode = FocusNode();
   late TabController tabController;
   final weatherController = Get.put(WeatherController());
@@ -42,6 +42,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.initState();
     getData();
     setupTabController();
+    _checkLocationCache();
   }
 
   @override
@@ -73,6 +74,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     await weatherController.setLocation();
   }
 
+  Future<void> _checkLocationCache() async {
+    final caches = await isar.locationCaches.where().findAll();
+    if (mounted) {
+      setState(() => _hasLocationCache = caches.isNotEmpty);
+    }
+  }
+
   void changeTabIndex(int index) {
     setState(() => tabIndex = index);
     tabController.animateTo(tabIndex);
@@ -102,7 +110,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             : '$city, $district'
                       : settings.location
                       ? 'search'.tr
-                      : (isar.locationCaches.where().findAllSync()).isNotEmpty
+                      : _hasLocationCache
                       ? 'loading'.tr
                       : 'searchCity'.tr,
                   style: textStyle,
@@ -214,74 +222,71 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) => DefaultTabController(
     length: pages.length,
-    child: ScaffoldMessenger(
-      key: globalKey,
-      child: Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          automaticallyImplyLeading: false,
-          leading: tabIndex == 0
-              ? IconButton(
-                  onPressed: () => Get.to(
-                    () => const SelectGeolocation(isStart: false),
-                    transition: Transition.downToUp,
-                  ),
-                  icon: const Icon(IconsaxPlusLinear.global_search, size: 18),
-                )
-              : null,
-          title: _buildAppBarTitle(
-            tabIndex,
-            context.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              fontSize: 18,
-            ),
-            context.textTheme.labelLarge,
-          ),
-          actions: tabIndex == 0 ? [_buildSearchIconButton()] : null,
-        ),
-        body: SafeArea(
-          child: TabBarView(controller: tabController, children: pages),
-        ),
-        bottomNavigationBar: NavigationBar(
-          onDestinationSelected: (int index) => changeTabIndex(index),
-          selectedIndex: tabIndex,
-          destinations: [
-            NavigationDestination(
-              icon: const Icon(IconsaxPlusLinear.cloud_sunny),
-              selectedIcon: const Icon(IconsaxPlusBold.cloud_sunny),
-              label: 'name'.tr,
-            ),
-            NavigationDestination(
-              icon: const Icon(IconsaxPlusLinear.buildings),
-              selectedIcon: const Icon(IconsaxPlusBold.buildings),
-              label: 'cities'.tr,
-            ),
-            if (!settings.hideMap)
-              NavigationDestination(
-                icon: const Icon(IconsaxPlusLinear.map),
-                selectedIcon: const Icon(IconsaxPlusBold.map),
-                label: 'map'.tr,
-              ),
-            NavigationDestination(
-              icon: const Icon(IconsaxPlusLinear.category),
-              selectedIcon: const Icon(IconsaxPlusBold.category),
-              label: 'settings_full'.tr,
-            ),
-          ],
-        ),
-        floatingActionButton: tabIndex == 1
-            ? FloatingActionButton(
-                onPressed: () => showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  enableDrag: false,
-                  builder: (BuildContext context) =>
-                      const PlaceAction(edit: false),
+    child: Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        leading: tabIndex == 0
+            ? IconButton(
+                onPressed: () => Get.to(
+                  () => const SelectGeolocation(isStart: false),
+                  transition: Transition.downToUp,
                 ),
-                child: const Icon(IconsaxPlusLinear.add),
+                icon: const Icon(IconsaxPlusLinear.global_search, size: 18),
               )
             : null,
+        title: _buildAppBarTitle(
+          tabIndex,
+          context.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+          context.textTheme.labelLarge,
+        ),
+        actions: tabIndex == 0 ? [_buildSearchIconButton()] : null,
       ),
+      body: SafeArea(
+        child: TabBarView(controller: tabController, children: pages),
+      ),
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (int index) => changeTabIndex(index),
+        selectedIndex: tabIndex,
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(IconsaxPlusLinear.cloud_sunny),
+            selectedIcon: const Icon(IconsaxPlusBold.cloud_sunny),
+            label: 'name'.tr,
+          ),
+          NavigationDestination(
+            icon: const Icon(IconsaxPlusLinear.buildings),
+            selectedIcon: const Icon(IconsaxPlusBold.buildings),
+            label: 'cities'.tr,
+          ),
+          if (!settings.hideMap)
+            NavigationDestination(
+              icon: const Icon(IconsaxPlusLinear.map),
+              selectedIcon: const Icon(IconsaxPlusBold.map),
+              label: 'map'.tr,
+            ),
+          NavigationDestination(
+            icon: const Icon(IconsaxPlusLinear.category),
+            selectedIcon: const Icon(IconsaxPlusBold.category),
+            label: 'settings_full'.tr,
+          ),
+        ],
+      ),
+      floatingActionButton: tabIndex == 1
+          ? FloatingActionButton(
+              onPressed: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                enableDrag: false,
+                builder: (BuildContext context) =>
+                    const PlaceAction(edit: false),
+              ),
+              child: const Icon(IconsaxPlusLinear.add),
+            )
+          : null,
     ),
   );
 }

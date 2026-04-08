@@ -81,6 +81,7 @@ class _PlaceListState extends State<PlaceList> {
       labelText: 'search'.tr,
       type: TextInputType.text,
       icon: const Icon(IconsaxPlusLinear.search_normal_1, size: 20),
+      variant: TextFieldVariant.card,
       controller: searchTasks,
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       onChanged: applyFilter,
