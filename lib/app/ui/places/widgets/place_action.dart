@@ -36,6 +36,7 @@ class _PlaceActionState extends State<PlaceAction>
   final _formKey = GlobalKey<FormState>();
   final _focusNode = FocusNode();
   final weatherController = Get.put(WeatherController());
+  bool _isSaving = false;
 
   static const kTextFieldElevation = 0.0;
 
@@ -145,7 +146,7 @@ class _PlaceActionState extends State<PlaceAction>
     }
   }
 
-  void _onSavePressed() {
+  Future<void> _onSavePressed() async {
     if (!_formKey.currentState!.validate()) return;
 
     _latController.text = _latController.text.trim();
@@ -153,7 +154,9 @@ class _PlaceActionState extends State<PlaceAction>
     _cityController.text = _cityController.text.trim();
     _districtController.text = _districtController.text.trim();
 
-    _handleSubmit();
+    setState(() => _isSaving = true);
+    await _handleSubmit();
+    if (mounted) setState(() => _isSaving = false);
   }
 
   void fillController(Result selection) {
@@ -294,20 +297,20 @@ class _PlaceActionState extends State<PlaceAction>
       valueListenable: _editingController.canCompose,
       builder: (context, canCompose, _) {
         return AnimatedScale(
-          scale: canCompose ? 1.0 : 0.92,
+          scale: canCompose || _isSaving ? 1.0 : 0.92,
           duration: AppConstants.longAnimation,
           curve: Curves.easeOutCubic,
           child: Material(
-            color: canCompose
+            color: canCompose || _isSaving
                 ? colorScheme.primary
                 : colorScheme.surfaceContainerHigh,
-            elevation: canCompose ? AppConstants.elevationLow : 0,
+            elevation: canCompose || _isSaving ? AppConstants.elevationLow : 0,
             shadowColor: colorScheme.primary.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(
               AppConstants.borderRadiusXLarge,
             ),
             child: InkWell(
-              onTap: canCompose ? _onSavePressed : null,
+              onTap: (canCompose && !_isSaving) ? _onSavePressed : null,
               borderRadius: BorderRadius.circular(
                 AppConstants.borderRadiusXLarge,
               ),
@@ -316,33 +319,44 @@ class _PlaceActionState extends State<PlaceAction>
                   horizontal: 14,
                   vertical: AppConstants.spacingS,
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      IconsaxPlusBold.tick_circle,
-                      size: AppConstants.iconSizeSmall,
-                      color: canCompose
-                          ? colorScheme.onPrimary
-                          : colorScheme.onSurfaceVariant,
-                    ),
-                    SizedBox(width: AppConstants.spacingXS + 2),
-                    Text(
-                      widget.edit ? 'save'.tr : 'done'.tr,
-                      style: TextStyle(
-                        fontSize: ResponsiveUtils.getResponsiveFontSize(
-                          context,
-                          13,
+                child: _isSaving
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            colorScheme.onPrimary,
+                          ),
                         ),
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.2,
-                        color: canCompose
-                            ? colorScheme.onPrimary
-                            : colorScheme.onSurfaceVariant,
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            IconsaxPlusBold.tick_circle,
+                            size: AppConstants.iconSizeSmall,
+                            color: canCompose
+                                ? colorScheme.onPrimary
+                                : colorScheme.onSurfaceVariant,
+                          ),
+                          SizedBox(width: AppConstants.spacingXS + 2),
+                          Text(
+                            widget.edit ? 'save'.tr : 'done'.tr,
+                            style: TextStyle(
+                              fontSize: ResponsiveUtils.getResponsiveFontSize(
+                                context,
+                                13,
+                              ),
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.2,
+                              color: canCompose
+                                  ? colorScheme.onPrimary
+                                  : colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ),
@@ -647,6 +661,7 @@ class _PlaceActionState extends State<PlaceAction>
             context,
           ).showSnackBar(SnackBar(content: Text('error'.tr)));
         }
+        rethrow;
       }
     }
   }

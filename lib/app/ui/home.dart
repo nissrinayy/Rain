@@ -136,7 +136,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       controller: _controller,
       focusNode: _focusNode,
       style: labelLarge?.copyWith(fontSize: 16),
-      decoration: InputDecoration(hintText: 'search'.tr),
+      decoration: InputDecoration(
+        hintText: 'search'.tr,
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
+      ),
     ),
     optionsBuilder: (TextEditingValue textEditingValue) {
       if (textEditingValue.text.isEmpty) {
