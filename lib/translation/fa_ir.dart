@@ -151,5 +151,8 @@ class FaIr {
     'hideMap': 'پنهان کردن نقشه',
     'edit': 'ویرایش',
     'no_desc_data': 'داده ای وجود ندارد',
+    'discord': 'دیسکورد',
+    'telegram': 'تلگرام',
+    'error_occurred': 'خطایی رخ داد',
   };
 }

@@ -149,5 +149,8 @@ class HuHu {
     'hideMap': 'Térkép elrejtése',
     'edit': 'Szerkesztés',
     'no_desc_data': 'Nincs adat',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Hiba történt',
   };
 }

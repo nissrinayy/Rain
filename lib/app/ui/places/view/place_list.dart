@@ -13,7 +13,7 @@ class PlaceList extends StatefulWidget {
 }
 
 class _PlaceListState extends State<PlaceList> {
-  final weatherController = Get.put(WeatherController());
+  final weatherController = Get.find<WeatherController>();
   final TextEditingController searchTasks = TextEditingController();
   String filter = '';
 
@@ -37,12 +37,32 @@ class _PlaceListState extends State<PlaceList> {
   Widget build(BuildContext context) => Obx(() => _buildContent(context));
 
   Widget _buildContent(BuildContext context) {
+    if (weatherController.isLoading.isTrue) {
+      return _buildLoadingState(context);
+    }
+
     if (weatherController.weatherCards.isEmpty) {
       return _buildEmptyState(context);
     } else {
       return _buildListView(context);
     }
   }
+
+  Widget _buildLoadingState(BuildContext context) => Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const CircularProgressIndicator(),
+        const SizedBox(height: 16),
+        Text(
+          'loading'.tr,
+          style: context.textTheme.bodyMedium?.copyWith(
+            color: context.theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _buildEmptyState(BuildContext context) => Center(
     child: SingleChildScrollView(

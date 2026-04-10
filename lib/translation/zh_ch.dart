@@ -144,5 +144,8 @@ class ZhCh {
     'hideMap': '隐藏地图',
     'edit': '编辑',
     'no_desc_data': '无数据',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': '发生错误',
   };
 }

@@ -24,7 +24,7 @@ class PlaceInfo extends StatefulWidget {
 class _PlaceInfoState extends State<PlaceInfo> {
   int timeNow = 0;
   int dayNow = 0;
-  final weatherController = Get.put(WeatherController());
+  final weatherController = Get.find<WeatherController>();
   final itemScrollController = ItemScrollController();
 
   @override

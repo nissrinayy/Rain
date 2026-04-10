@@ -148,5 +148,8 @@ class RoRo {
     'hideMap': 'Ascunde harta',
     'edit': 'Editare',
     'no_desc_data': 'Fără date',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'A apărut o eroare',
   };
 }

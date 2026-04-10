@@ -20,7 +20,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  final weatherController = Get.put(WeatherController());
+  final weatherController = Get.find<WeatherController>();
 
   @override
   Widget build(BuildContext context) => RefreshIndicator(
@@ -36,10 +36,23 @@ class _MainPageState extends State<MainPage> {
         final weatherCard = WeatherCard.fromJson(mainWeather.toJson());
         final hourOfDay = weatherController.hourOfDay.value;
         final dayOfNow = weatherController.dayOfNow.value;
+
+        if (dayOfNow < 0 ||
+            mainWeather.sunrise == null ||
+            mainWeather.sunset == null ||
+            mainWeather.temperature2MMax == null ||
+            mainWeather.temperature2MMin == null) {
+          return _buildLoadingView();
+        }
+
         final sunrise = mainWeather.sunrise![dayOfNow];
         final sunset = mainWeather.sunset![dayOfNow];
         final tempMax = mainWeather.temperature2MMax![dayOfNow];
         final tempMin = mainWeather.temperature2MMin![dayOfNow];
+
+        if (tempMax == null || tempMin == null) {
+          return _buildLoadingView();
+        }
 
         return _buildMainView(
           context,
@@ -49,8 +62,8 @@ class _MainPageState extends State<MainPage> {
           dayOfNow,
           sunrise,
           sunset,
-          tempMax!,
-          tempMin!,
+          tempMax,
+          tempMin,
         );
       }),
     ),
@@ -159,21 +172,23 @@ class _MainPageState extends State<MainPage> {
         weatherController.dayOfNow.value = i24;
         setState(() {});
       },
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 5),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-        decoration: BoxDecoration(
-          color: i == hourOfDay
-              ? context.theme.colorScheme.secondaryContainer
-              : Colors.transparent,
-          borderRadius: const BorderRadius.all(Radius.circular(20)),
-        ),
-        child: Hourly(
-          time: mainWeather.time![i],
-          weather: mainWeather.weathercode![i],
-          degree: mainWeather.temperature2M![i],
-          timeDay: mainWeather.sunrise![i24],
-          timeNight: mainWeather.sunset![i24],
+      child: RepaintBoundary(
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          decoration: BoxDecoration(
+            color: i == hourOfDay
+                ? context.theme.colorScheme.secondaryContainer
+                : Colors.transparent,
+            borderRadius: const BorderRadius.all(Radius.circular(20)),
+          ),
+          child: Hourly(
+            time: mainWeather.time![i],
+            weather: mainWeather.weathercode![i],
+            degree: mainWeather.temperature2M![i],
+            timeDay: mainWeather.sunrise![i24],
+            timeNight: mainWeather.sunset![i24],
+          ),
         ),
       ),
     );

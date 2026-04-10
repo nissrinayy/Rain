@@ -149,5 +149,8 @@ class RuRu {
     'hideMap': 'Скрыть карту',
     'edit': 'Редактирование',
     'no_desc_data': 'Нет данных',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Произошла ошибка',
   };
 }

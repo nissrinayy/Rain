@@ -151,5 +151,8 @@ class FrFr {
     'hideMap': 'Cacher la carte',
     'edit': 'Modifier',
     'no_desc_data': 'Aucune donnée',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Une erreur s\'est produite',
   };
 }

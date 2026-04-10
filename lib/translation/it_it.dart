@@ -149,5 +149,8 @@ class ItIt {
     'hideMap': 'Nascondi mappa',
     'edit': 'Modifica',
     'no_desc_data': 'Nessun dato',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Si è verificato un errore',
   };
 }

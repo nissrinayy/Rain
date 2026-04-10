@@ -34,7 +34,7 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   late final AnimatedMapController _animatedMapController =
       AnimatedMapController(vsync: this);
-  final weatherController = Get.put(WeatherController());
+  final weatherController = Get.find<WeatherController>();
   final statusWeather = StatusWeather();
   final statusData = StatusData();
   final Future<CacheStore> _cacheStoreFuture = _getCacheStore();

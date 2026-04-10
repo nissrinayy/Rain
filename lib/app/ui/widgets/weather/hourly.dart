@@ -5,7 +5,7 @@ import 'package:rain/app/ui/widgets/weather/status/status_data.dart';
 import 'package:rain/app/ui/widgets/weather/status/status_weather.dart';
 import 'package:rain/main.dart';
 
-class Hourly extends StatefulWidget {
+class Hourly extends StatelessWidget {
   const Hourly({
     super.key,
     required this.time,
@@ -22,50 +22,46 @@ class Hourly extends StatefulWidget {
   final double degree;
 
   @override
-  State<Hourly> createState() => _HourlyState();
-}
-
-class _HourlyState extends State<Hourly> {
-  final statusWeather = StatusWeather();
-  final statusData = StatusData();
-
-  @override
   Widget build(BuildContext context) {
+    final statusWeather = StatusWeather();
+    final statusData = StatusData();
     final textTheme = context.textTheme;
-    final time = widget.time;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildTimeText(textTheme, time),
-        _buildWeatherImage(),
-        _buildTemperatureText(textTheme),
+        _buildTimeText(textTheme, statusData),
+        _buildWeatherImage(statusWeather),
+        _buildTemperatureText(textTheme, statusData),
       ],
     );
   }
 
-  Widget _buildTimeText(TextTheme textTheme, String time) => Column(
-    children: [
-      Text(statusData.getTimeFormat(time), style: textTheme.labelLarge),
-      Text(
-        DateFormat('E', locale.languageCode).format(DateTime.tryParse(time)!),
-        style: textTheme.labelLarge?.copyWith(color: Colors.grey),
-      ),
-    ],
-  );
+  Widget _buildTimeText(TextTheme textTheme, StatusData statusData) {
+    final parsedTime = DateTime.tryParse(time);
 
-  Widget _buildWeatherImage() => Image.asset(
-    statusWeather.getImageToday(
-      widget.weather,
-      widget.time,
-      widget.timeDay,
-      widget.timeNight,
-    ),
+    return Column(
+      children: [
+        Text(statusData.getTimeFormat(time), style: textTheme.labelLarge),
+        if (parsedTime != null)
+          Text(
+            DateFormat('E', locale.languageCode).format(parsedTime),
+            style: textTheme.labelLarge?.copyWith(
+              color: textTheme.bodySmall?.color,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildWeatherImage(StatusWeather statusWeather) => Image.asset(
+    statusWeather.getImageToday(weather, time, timeDay, timeNight),
     scale: 3,
   );
 
-  Widget _buildTemperatureText(TextTheme textTheme) => Text(
-    statusData.getDegree(widget.degree.round()),
-    style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-  );
+  Widget _buildTemperatureText(TextTheme textTheme, StatusData statusData) =>
+      Text(
+        statusData.getDegree(degree.round()),
+        style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+      );
 }

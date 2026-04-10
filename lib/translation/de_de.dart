@@ -152,5 +152,8 @@ class DeDe {
     'hideMap': 'Karte ausblenden',
     'edit': 'Bearbeiten',
     'no_desc_data': 'Keine daten',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Ein Fehler ist aufgetreten',
   };
 }

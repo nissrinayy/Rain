@@ -151,5 +151,8 @@ class AsIn {
     'hideMap': 'মানচিত্ৰ লুকুৱাওক',
     'edit': 'সম্পাদনা কৰক',
     'no_desc_data': 'কোনো তথ্য নাই',
+    'discord': 'ডিস্কৰ্ড',
+    'telegram': 'টেলিগ্ৰাম',
+    'error_occurred': 'এটা ত্ৰুটি হৈছে',
   };
 }

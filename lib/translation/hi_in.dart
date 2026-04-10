@@ -147,5 +147,8 @@ class HiIn {
     'hideMap': 'मानचित्र छिपाएँ',
     'edit': 'संपादित करें',
     'no_desc_data': 'कोई डेटा नहीं',
+    'discord': 'डिस्कॉर्ड',
+    'telegram': 'टेलीग्राम',
+    'error_occurred': 'एक त्रुटि हुई',
   };
 }

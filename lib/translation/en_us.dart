@@ -149,5 +149,8 @@ class EnUs {
     'hideMap': 'Hide map',
     'edit': 'Edit',
     'no_desc_data': 'No data',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'An error occurred',
   };
 }

@@ -148,5 +148,8 @@ class PlPl {
     'hideMap': 'Ukryj mapę',
     'edit': 'Edytuj',
     'no_desc_data': 'Brak danych',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Wystąpił błąd',
   };
 }

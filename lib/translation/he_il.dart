@@ -149,5 +149,8 @@ class HeIl {
     'addWidget': 'הוסף ווידג\'ט',
     'hideMap': 'הסתר מפה',
     'edit': 'ערוך',
+    'discord': 'דיסקורד',
+    'telegram': 'טלגרם',
+    'error_occurred': 'אירעה שגיאה',
   };
 }

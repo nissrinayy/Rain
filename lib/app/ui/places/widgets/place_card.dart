@@ -37,7 +37,7 @@ class PlaceCard extends StatefulWidget {
 class _PlaceCardState extends State<PlaceCard> {
   final statusWeather = StatusWeather();
   final statusData = StatusData();
-  final weatherController = Get.put(WeatherController());
+  final weatherController = Get.find<WeatherController>();
 
   @override
   Widget build(BuildContext context) {

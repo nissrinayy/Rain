@@ -148,5 +148,8 @@ class ArSa {
     'hideMap': 'إخفاء الخريطة',
     'edit': 'تحرير',
     'no_desc_data': 'لا توجد بيانات',
+    'discord': 'ديسكورد',
+    'telegram': 'تيليجرام',
+    'error_occurred': 'حدث خطأ',
   };
 }

@@ -149,5 +149,8 @@ class DaDk {
     'hideMap': 'Skjul kort',
     'edit': 'Rediger',
     'no_desc_data': 'Ingen data',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Der opstod en fejl',
   };
 }

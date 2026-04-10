@@ -4,7 +4,7 @@ import 'package:rain/app/ui/widgets/weather/desc/desc.dart';
 import 'package:rain/app/ui/widgets/weather/desc/message.dart';
 import 'package:rain/app/ui/widgets/weather/status/status_data.dart';
 
-class DescContainer extends StatefulWidget {
+class DescContainer extends StatelessWidget {
   const DescContainer({
     super.key,
     this.humidity,
@@ -63,45 +63,42 @@ class DescContainer extends StatefulWidget {
   final String title;
 
   @override
-  State<DescContainer> createState() => _DescContainerState();
-}
+  Widget build(BuildContext context) {
+    final statusData = StatusData();
+    final message = Message();
 
-class _DescContainerState extends State<DescContainer> {
-  final statusData = StatusData();
-  final message = Message();
-
-  @override
-  Widget build(BuildContext context) => Card(
-    margin: const EdgeInsets.only(bottom: 15),
-    child: ExpansionTile(
-      shape: const Border(),
-      title: Text(widget.title, style: context.textTheme.labelLarge),
-      initiallyExpanded: widget.initiallyExpanded,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 20, bottom: 5),
-          child: Wrap(
-            alignment: WrapAlignment.spaceEvenly,
-            spacing: 5,
-            children: _buildWeatherDescriptions(context),
+    return Card(
+      margin: const EdgeInsets.only(bottom: 15),
+      child: ExpansionTile(
+        shape: const Border(),
+        title: Text(title, style: context.textTheme.labelLarge),
+        initiallyExpanded: initiallyExpanded,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 20, bottom: 5),
+            child: Wrap(
+              alignment: WrapAlignment.spaceEvenly,
+              spacing: 5,
+              children: _buildWeatherDescriptions(context, statusData, message),
+            ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 
-  List<Widget> _buildWeatherDescriptions(BuildContext context) {
+  List<Widget> _buildWeatherDescriptions(
+    BuildContext context,
+    StatusData statusData,
+    Message message,
+  ) {
     final List<Widget> descriptions = [];
 
-    String addMessageOrDefault(message) {
-      var widgetMessage = message;
-      if (widgetMessage == null ||
-          widgetMessage.isEmpty ||
-          widgetMessage == 'null') {
-        widgetMessage = 'no_desc_data'.tr;
+    String addMessageOrDefault(String? message) {
+      if (message == null || message.isEmpty || message == 'null') {
+        return 'no_desc_data'.tr;
       }
-
-      return widgetMessage;
+      return message;
     }
 
     void addDescriptionIfNotNull({
@@ -110,149 +107,144 @@ class _DescContainerState extends State<DescContainer> {
       required String desc,
       String? message,
     }) {
-      if (value != null &&
-          value != '' &&
-          value != 'null°C' &&
-          value != 'null°F' &&
-          value != 'null°' &&
-          value != 'null%' &&
-          value != 'null ${'W/m2'.tr}') {
+      final stringValue = value?.toString();
+      if (stringValue != null &&
+          stringValue.isNotEmpty &&
+          !stringValue.startsWith('null')) {
         descriptions.add(
           DescWeather(
             imageName: imageName,
-            value: value.toString(),
+            value: stringValue,
             desc: desc,
             message: addMessageOrDefault(message),
           ),
         );
-      } else {
-        descriptions.add(Container());
       }
     }
 
     final weatherData = [
       {
-        'value': statusData.getDegree(widget.apparentTemperatureMin?.round()),
+        'value': statusData.getDegree(apparentTemperatureMin?.round()),
         'imageName': 'assets/images/cold.png',
         'desc': 'apparentTemperatureMin'.tr,
       },
       {
-        'value': statusData.getDegree(widget.apparentTemperatureMax?.round()),
+        'value': statusData.getDegree(apparentTemperatureMax?.round()),
         'imageName': 'assets/images/hot.png',
         'desc': 'apparentTemperatureMax'.tr,
       },
       {
-        'value': widget.uvIndexMax?.round(),
+        'value': uvIndexMax?.round(),
         'imageName': 'assets/images/uv.png',
         'desc': 'uvIndex'.tr,
-        'message': message.getUvIndex(widget.uvIndexMax?.round()),
+        'message': message.getUvIndex(uvIndexMax?.round()),
       },
       {
-        'value': '${widget.windDirection10MDominant}°',
+        'value': '$windDirection10MDominant°',
         'imageName': 'assets/images/windsock.png',
         'desc': 'direction'.tr,
-        'message': message.getDirection(widget.windDirection10MDominant),
+        'message': message.getDirection(windDirection10MDominant),
       },
       {
-        'value': statusData.getSpeed(widget.windSpeed10MMax?.round()),
+        'value': statusData.getSpeed(windSpeed10MMax?.round()),
         'imageName': 'assets/images/wind.png',
         'desc': 'wind'.tr,
       },
       {
-        'value': statusData.getSpeed(widget.windGusts10MMax?.round()),
+        'value': statusData.getSpeed(windGusts10MMax?.round()),
         'imageName': 'assets/images/windgusts.png',
         'desc': 'windgusts'.tr,
       },
       {
-        'value': '${widget.precipitationProbabilityMax}%',
+        'value': '$precipitationProbabilityMax%',
         'imageName': 'assets/images/precipitation_probability.png',
         'desc': 'precipitationProbability'.tr,
       },
       {
-        'value': statusData.getPrecipitation(widget.rainSum),
+        'value': statusData.getPrecipitation(rainSum),
         'imageName': 'assets/images/water.png',
         'desc': 'rain'.tr,
       },
       {
-        'value': statusData.getPrecipitation(widget.precipitationSum),
+        'value': statusData.getPrecipitation(precipitationSum),
         'imageName': 'assets/images/rainfall.png',
         'desc': 'precipitation'.tr,
       },
       {
-        'value': statusData.getDegree(widget.dewpoint2M?.round()),
+        'value': statusData.getDegree(dewpoint2M?.round()),
         'imageName': 'assets/images/dew.png',
         'desc': 'dewpoint'.tr,
       },
       {
-        'value': statusData.getDegree(widget.feels?.round()),
+        'value': statusData.getDegree(feels?.round()),
         'imageName': 'assets/images/temperature.png',
         'desc': 'feels'.tr,
       },
       {
-        'value': statusData.getVisibility(widget.visibility),
+        'value': statusData.getVisibility(visibility),
         'imageName': 'assets/images/fog.png',
         'desc': 'visibility'.tr,
       },
       {
-        'value': '${widget.direction}°',
+        'value': '$direction°',
         'imageName': 'assets/images/windsock.png',
         'desc': 'direction'.tr,
-        'message': message.getDirection(widget.direction),
+        'message': message.getDirection(direction),
       },
       {
-        'value': statusData.getSpeed(widget.wind?.round()),
+        'value': statusData.getSpeed(wind?.round()),
         'imageName': 'assets/images/wind.png',
         'desc': 'wind'.tr,
       },
       {
-        'value': statusData.getSpeed(widget.windgusts?.round()),
+        'value': statusData.getSpeed(windgusts?.round()),
         'imageName': 'assets/images/windgusts.png',
         'desc': 'windgusts'.tr,
       },
       {
-        'value': statusData.getPrecipitation(widget.evaporation?.abs()),
+        'value': statusData.getPrecipitation(evaporation?.abs()),
         'imageName': 'assets/images/evaporation.png',
         'desc': 'evaporation'.tr,
       },
       {
-        'value': statusData.getPrecipitation(widget.precipitation),
+        'value': statusData.getPrecipitation(precipitation),
         'imageName': 'assets/images/rainfall.png',
         'desc': 'precipitation'.tr,
       },
       {
-        'value': statusData.getPrecipitation(widget.rain),
+        'value': statusData.getPrecipitation(rain),
         'imageName': 'assets/images/water.png',
         'desc': 'rain'.tr,
       },
       {
-        'value': '${widget.precipitationProbability}%',
+        'value': '$precipitationProbability%',
         'imageName': 'assets/images/precipitation_probability.png',
         'desc': 'precipitationProbability'.tr,
       },
       {
-        'value': '${widget.humidity}%',
+        'value': '$humidity%',
         'imageName': 'assets/images/humidity.png',
         'desc': 'humidity'.tr,
       },
       {
-        'value': '${widget.cloudcover}%',
+        'value': '$cloudcover%',
         'imageName': 'assets/images/cloudy.png',
         'desc': 'cloudcover'.tr,
       },
       {
-        'value': statusData.getPressure(widget.pressure?.round()),
+        'value': statusData.getPressure(pressure?.round()),
         'imageName': 'assets/images/atmospheric.png',
         'desc': 'pressure'.tr,
-        'message': message.getPressure(widget.pressure?.round()),
+        'message': message.getPressure(pressure?.round()),
       },
       {
-        'value': widget.uvIndex?.round(),
+        'value': uvIndex?.round(),
         'imageName': 'assets/images/uv.png',
         'desc': 'uvIndex'.tr,
-        'message': message.getUvIndex(widget.uvIndex?.round()),
+        'message': message.getUvIndex(uvIndex?.round()),
       },
       {
-        'value': '${widget.shortwaveRadiation?.round()} ${'W/m2'.tr}',
+        'value': '${shortwaveRadiation?.round()} ${'W/m2'.tr}',
         'imageName': 'assets/images/shortwave_radiation.png',
         'desc': 'shortwaveRadiation'.tr,
       },
@@ -263,7 +255,7 @@ class _DescContainerState extends State<DescContainer> {
         value: data['value'],
         imageName: '${data['imageName']}',
         desc: '${data['desc']}',
-        message: '${data['message']}',
+        message: data['message'] as String?,
       );
     }
 

@@ -98,6 +98,7 @@ void callbackDispatcher() => Workmanager().executeTask(
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeApp();
+  Get.put(WeatherController(), permanent: true);
   runApp(const MyApp());
 }
 

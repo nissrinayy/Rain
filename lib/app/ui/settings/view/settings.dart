@@ -32,7 +32,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   final themeController = Get.put(ThemeController());
-  final weatherController = Get.put(WeatherController());
+  final weatherController = Get.find<WeatherController>();
   String? appVersion;
   String? colorBackground;
   String? colorText;
@@ -92,7 +92,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildAppearanceSection(BuildContext context) {
     return SettingsSection(
       title: 'appearance',
-      icon: IconsaxPlusLinear.brush_1,
+      icon: IconsaxPlusBold.brush_1,
       children: [
         SettingsTile(
           leading: const Icon(IconsaxPlusLinear.moon),
@@ -156,7 +156,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildFunctionsSection(BuildContext context) {
     return SettingsSection(
       title: 'functions',
-      icon: IconsaxPlusLinear.code_1,
+      icon: IconsaxPlusBold.code_1,
       children: [
         SettingsTile(
           leading: const Icon(IconsaxPlusLinear.map),
@@ -205,7 +205,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildDataSection(BuildContext context) {
     return SettingsSection(
       title: 'data',
-      icon: IconsaxPlusLinear.d_square,
+      icon: IconsaxPlusBold.d_square,
       children: [
         SettingsTile(
           leading: const Icon(IconsaxPlusLinear.cloud_notif),
@@ -261,7 +261,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildWidgetSection(BuildContext context) {
     return SettingsSection(
       title: 'widget',
-      icon: IconsaxPlusLinear.setting_3,
+      icon: IconsaxPlusBold.setting_3,
       children: [
         SettingsTile(
           leading: const Icon(IconsaxPlusLinear.add_square),
@@ -327,7 +327,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildMapSection(BuildContext context) {
     return SettingsSection(
       title: 'map',
-      icon: IconsaxPlusLinear.map,
+      icon: IconsaxPlusBold.map,
       children: [
         SettingsTile(
           leading: const Icon(IconsaxPlusLinear.location_slash),
@@ -366,7 +366,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return SettingsSection(
       title: 'language',
-      icon: IconsaxPlusLinear.language_square,
+      icon: IconsaxPlusBold.language_square,
       children: [
         SettingsTile(
           leading: const Icon(IconsaxPlusLinear.language_square),
@@ -381,17 +381,17 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildGroupsSection(BuildContext context) {
     return SettingsSection(
       title: 'groups',
-      icon: IconsaxPlusLinear.link_square,
+      icon: IconsaxPlusBold.link_square,
       children: [
         SettingsTile(
           leading: const Icon(LineAwesomeIcons.discord),
-          title: 'Discord',
+          title: 'discord'.tr,
           onTap: () =>
               weatherController.urlLauncher('https://discord.gg/JMMa9aHh8f'),
         ),
         SettingsTile(
           leading: const Icon(LineAwesomeIcons.telegram),
-          title: 'Telegram',
+          title: 'telegram'.tr,
           onTap: () =>
               weatherController.urlLauncher('https://t.me/darkmoonightX'),
         ),
@@ -402,7 +402,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildAboutSection(BuildContext context) {
     return SettingsSection(
       title: 'aboutApp',
-      icon: IconsaxPlusLinear.info_circle,
+      icon: IconsaxPlusBold.info_circle,
       children: [
         SettingsTile(
           leading: const Icon(IconsaxPlusLinear.document_text),

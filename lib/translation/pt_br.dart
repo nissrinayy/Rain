@@ -150,5 +150,8 @@ class PtBr {
     'hideMap': 'Ocultar mapa',
     'edit': 'Editar',
     'no_desc_data': 'Sem dados',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Ocorreu um erro',
   };
 }

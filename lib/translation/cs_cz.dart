@@ -149,5 +149,8 @@ class CsCz {
     'hideMap': 'Skrýt mapu',
     'edit': 'Upravit',
     'no_desc_data': 'Žádná data',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Došlo k chybě',
   };
 }

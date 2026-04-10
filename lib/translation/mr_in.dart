@@ -149,5 +149,8 @@ class MrIn {
     'addWidget': 'विजेट जोडा',
     'hideMap': 'नकाशा लपवा',
     'edit': 'संपादित करा',
+    'discord': 'डिस्कॉर्ड',
+    'telegram': 'टेलिग्राम',
+    'error_occurred': 'एक त्रुटी आली',
   };
 }

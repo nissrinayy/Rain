@@ -145,5 +145,8 @@ class ZhTw {
     'hideMap': '隱藏地圖',
     'edit': '編輯',
     'no_desc_data': '無數據',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': '發生錯誤',
   };
 }

@@ -14,6 +14,7 @@ import 'package:rain/app/ui/widgets/button.dart';
 import 'package:rain/app/ui/widgets/confirmation_dialog.dart';
 import 'package:rain/app/ui/widgets/text_form.dart';
 import 'package:rain/app/utils/navigation_helper.dart';
+import 'package:rain/app/utils/show_snack_bar.dart';
 import 'package:rain/main.dart';
 
 class SelectGeolocation extends StatefulWidget {
@@ -28,7 +29,7 @@ class _SelectGeolocationState extends State<SelectGeolocation> {
   bool isLoading = false;
   final formKeySearch = GlobalKey<FormState>();
   final _focusNode = FocusNode();
-  final weatherController = Get.put(WeatherController());
+  final weatherController = Get.find<WeatherController>();
   final _controller = TextEditingController();
   final _controllerLat = TextEditingController();
   final _controllerLon = TextEditingController();
@@ -323,7 +324,9 @@ class _SelectGeolocationState extends State<SelectGeolocation> {
             ? NavigationHelper.offDownToUp(() => const HomePage())
             : NavigationHelper.back();
       } catch (error) {
-        Future.error(error);
+        if (mounted) {
+          showSnackBar('error_occurred'.tr, isError: true);
+        }
       }
     }
   }

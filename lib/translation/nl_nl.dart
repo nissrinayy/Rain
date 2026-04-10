@@ -148,5 +148,8 @@ class NlNl {
     'hideMap': 'Kaart verbergen',
     'edit': 'Bewerken',
     'no_desc_data': 'Ingen data',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Er is een fout opgetreden',
   };
 }

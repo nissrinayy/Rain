@@ -149,5 +149,8 @@ class BnIn {
     'hideMap': 'মানচিত্র লুকান',
     'edit': 'সম্পাদনা',
     'no_desc_data': 'कोई डेटा नहीं',
+    'discord': 'ডিসকর্ড',
+    'telegram': 'টেলিগ্রাম',
+    'error_occurred': 'একটি ত্রুটি হয়েছে',
   };
 }

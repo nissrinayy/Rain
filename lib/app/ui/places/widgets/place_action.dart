@@ -35,7 +35,7 @@ class _PlaceActionState extends State<PlaceAction>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   final _formKey = GlobalKey<FormState>();
   final _focusNode = FocusNode();
-  final weatherController = Get.put(WeatherController());
+  final weatherController = Get.find<WeatherController>();
   bool _isSaving = false;
 
   static const kTextFieldElevation = 0.0;

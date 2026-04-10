@@ -149,5 +149,8 @@ class TeIn {
     'addWidget': 'విడ్జెట్ జోడించండి',
     'hideMap': 'మ్యాప్ దాచండి',
     'edit': 'సవరించు',
+    'discord': 'డిస్కార్డ్',
+    'telegram': 'టెలిగ్రామ్',
+    'error_occurred': 'లోపం సంభవించింది',
   };
 }

@@ -145,5 +145,8 @@ class KoKr {
     'hideMap': '지도를 숨기기',
     'edit': '편집',
     'no_desc_data': '데이터 없음',
+    'discord': '디스코드',
+    'telegram': '텔레그램',
+    'error_occurred': '오류가 발생했습니다',
   };
 }

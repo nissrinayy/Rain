@@ -149,5 +149,8 @@ class UrPk {
     'hideMap': 'نقشہ چھپائیں',
     'edit': 'ترمیم',
     'no_desc_data': 'کوئی ڈیٹا نہیں۔',
+    'discord': 'ڈسکورڈ',
+    'telegram': 'ٹیلیگرام',
+    'error_occurred': 'ایک خرابی پیش آئی',
   };
 }

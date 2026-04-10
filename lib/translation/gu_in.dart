@@ -149,5 +149,8 @@ class GuIn {
     'addWidget': 'વિજેટ ઉમેરો',
     'hideMap': 'નકશો છુપાવો',
     'edit': 'સંપાદિત કરો',
+    'discord': 'ડિસ્કોર્ડ',
+    'telegram': 'ટેલિગ્રામ',
+    'error_occurred': 'એક ભૂલ થઈ',
   };
 }

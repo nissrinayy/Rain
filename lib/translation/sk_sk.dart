@@ -149,5 +149,8 @@ class SkSk {
     'hideMap': 'Skryť mapu',
     'edit': 'Upraviť',
     'no_desc_data': 'Žiadne údaje',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Vyskytla sa chyba',
   };
 }

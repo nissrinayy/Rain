@@ -149,5 +149,8 @@ class KnIn {
     'addWidget': 'ವಿಜೆಟ್ ಸೇರಿಸಿ',
     'hideMap': 'ನಕ್ಷೆ ಮರೆಮಾಡಿ',
     'edit': 'ಸಂಪಾದಿಸಿ',
+    'discord': 'ಡಿಸ್ಕಾರ್ಡ್',
+    'telegram': 'ಟೆಲಿಗ್ರಾಮ್',
+    'error_occurred': 'ದೋಷ ಸಂಭವಿಸಿದೆ',
   };
 }

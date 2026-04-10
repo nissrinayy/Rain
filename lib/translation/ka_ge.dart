@@ -148,5 +148,8 @@ class KaGe {
     'hideMap': 'რუკის დამალვა',
     'edit': 'რედაქტირება',
     'no_desc_data': 'მონაცემები არ არის',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'მომხდარია შეცდომა',
   };
 }

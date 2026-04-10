@@ -150,5 +150,8 @@ class EsEs {
     'hideMap': 'Ocultar mapa',
     'edit': 'Editar',
     'no_desc_data': 'Sin datos',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Se produjo un error',
   };
 }

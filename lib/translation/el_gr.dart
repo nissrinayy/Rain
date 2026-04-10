@@ -153,5 +153,8 @@ class ElGr {
     'hideMap': 'Απόκρυψη χάρτη',
     'edit': 'Επεξεργασία',
     'no_desc_data': 'Χωρίς δεδομένα',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Παρουσιάστηκε σφάλμα',
   };
 }

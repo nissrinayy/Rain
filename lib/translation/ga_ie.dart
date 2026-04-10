@@ -152,5 +152,8 @@ class GaIe {
     'hideMap': 'Folaigh léarscáil',
     'edit': 'Eagar',
     'no_desc_data': 'Gan sonraí',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Tharla earráid',
   };
 }

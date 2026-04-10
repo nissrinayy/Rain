@@ -18,7 +18,7 @@ class PlaceCardList extends StatefulWidget {
 }
 
 class _PlaceCardListState extends State<PlaceCardList> {
-  final weatherController = Get.put(WeatherController());
+  final weatherController = Get.find<WeatherController>();
 
   @override
   Widget build(BuildContext context) {

@@ -149,5 +149,8 @@ class PaIn {
     'addWidget': 'ਵਿਜੇਟ ਸ਼ਾਮਲ ਕਰੋ',
     'hideMap': 'ਨਕਸ਼ਾ ਲੁਕਾਓ',
     'edit': 'ਸੰਪਾਦਿਤ ਕਰੋ',
+    'discord': 'ਡਿਸਕਾਰਡ',
+    'telegram': 'ਟੈਲੀਗ੍ਰਾਮ',
+    'error_occurred': 'ਇੱਕ ਗਲਤੀ ਹੋਈ',
   };
 }

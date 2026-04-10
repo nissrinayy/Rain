@@ -150,5 +150,8 @@ class TrTr {
     'hideMap': 'Haritayı gizle',
     'edit': 'Düzenle',
     'no_desc_data': 'Veri yok',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Bir hata oluştu',
   };
 }
