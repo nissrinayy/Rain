@@ -75,9 +75,7 @@ class _OnBoardingState extends State<OnBoarding> {
 
     if (!mounted) return;
 
-    NavigationHelper.offDownToUp(
-      () => const SelectGeolocation(isStart: true),
-    );
+    NavigationHelper.offDownToUp(() => const SelectGeolocation(isStart: true));
   }
 
   void _goToNextPage() {

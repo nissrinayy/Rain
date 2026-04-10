@@ -158,10 +158,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         selection.admin1,
         selection.name,
       );
-      visible = false;
-      _controller.clear();
-      _focusNode.unfocus();
-      setState(() {});
+      if (mounted) {
+        visible = false;
+        _controller.clear();
+        _focusNode.unfocus();
+        setState(() {});
+      }
     },
     displayStringForOption: (Result option) =>
         '${option.name}, ${option.admin1}',

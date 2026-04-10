@@ -235,7 +235,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           controller: _controllerSearch,
           margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
           focusNode: _focusNode,
-          onChanged: (value) => setState(() {}),
+          onChanged: (value) {},
           iconButton: _controllerSearch.text.isNotEmpty
               ? IconButton(
                   onPressed: () => _controllerSearch.clear(),

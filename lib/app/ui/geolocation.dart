@@ -61,7 +61,6 @@ class _SelectGeolocationState extends State<SelectGeolocation> {
     _controllerDistrict.text = selection.admin1;
     _controller.clear();
     _focusNode.unfocus();
-    setState(() {});
   }
 
   void fillControllerGeo(Map<String, dynamic> location) {
@@ -69,13 +68,11 @@ class _SelectGeolocationState extends State<SelectGeolocation> {
     _controllerLon.text = '${location['lon']}';
     _controllerCity.text = location['district'];
     _controllerDistrict.text = location['city'];
-    setState(() {});
   }
 
   void fillMap(double latitude, double longitude) {
     _controllerLat.text = '$latitude';
     _controllerLon.text = '$longitude';
-    setState(() {});
   }
 
   Widget _buildMapTileLayer() => TileLayer(

@@ -57,11 +57,7 @@ class NavigationHelper {
     Widget Function() page, {
     Transition transition = Transition.rightToLeft,
   }) {
-    return Get.off<T>(
-      page,
-      transition: transition,
-      duration: _defaultDuration,
-    );
+    return Get.off<T>(page, transition: transition, duration: _defaultDuration);
   }
 
   static Future<T?>? offDownToUp<T>(Widget Function() page) {

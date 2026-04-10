@@ -84,9 +84,8 @@ class _PlaceCardListState extends State<PlaceCardList> {
     BuildContext context,
     WeatherCard weatherCard,
   ) => GestureDetector(
-    onTap: () => NavigationHelper.toDownToUp(
-      () => PlaceInfo(weatherCard: weatherCard),
-    ),
+    onTap: () =>
+        NavigationHelper.toDownToUp(() => PlaceInfo(weatherCard: weatherCard)),
     child: PlaceCard(
       time: weatherCard.time!,
       timeDaily: weatherCard.timeDaily!,

@@ -10,6 +10,7 @@ import 'package:isar_community/isar.dart';
 import 'package:lat_lng_to_timezone/lat_lng_to_timezone.dart' as tzmap;
 import 'package:path_provider/path_provider.dart';
 import 'package:rain/app/api/api.dart';
+import 'package:rain/app/constants/app_constants.dart';
 import 'package:rain/app/data/db.dart';
 import 'package:rain/app/utils/notification.dart';
 import 'package:rain/app/utils/show_snack_bar.dart';
@@ -49,10 +50,11 @@ class WeatherController extends GetxController {
   final hourOfDay = 0.obs;
   final dayOfNow = 0.obs;
   final itemScrollController = ItemScrollController();
-  final cacheExpiry = DateTime.now().subtract(const Duration(hours: 12));
+  late final DateTime cacheExpiry;
 
   @override
   void onInit() async {
+    cacheExpiry = DateTime.now().subtract(AppConstants.cacheExpiry);
     weatherCards.assignAll(
       await isar.weatherCards.where().sortByIndex().findAll(),
     );
@@ -108,7 +110,7 @@ class WeatherController extends GetxController {
       return;
     }
 
-    if ((await isar.mainWeatherCaches.where().findAll()).isNotEmpty) {
+    if (await isar.mainWeatherCaches.where().isNotEmpty()) {
       await readCache();
       return;
     }
@@ -174,7 +176,7 @@ class WeatherController extends GetxController {
       return;
     }
 
-    if ((await isar.mainWeatherCaches.where().findAll()).isNotEmpty) {
+    if (await isar.mainWeatherCaches.where().isNotEmpty()) {
       await readCache();
       return;
     }
@@ -230,18 +232,21 @@ class WeatherController extends GetxController {
 
     isLoading.value = false;
 
-    Future.delayed(const Duration(milliseconds: 30), scrollToCurrentHour);
+    Future.delayed(AppConstants.scrollToCurrentHourDelay, scrollToCurrentHour);
   }
 
-  void scrollToCurrentHour() {
+  void scrollToCurrentHour({int retryCount = 0}) {
     if (itemScrollController.isAttached) {
       itemScrollController.scrollTo(
         index: hourOfDay.value,
-        duration: const Duration(seconds: 2),
+        duration: AppConstants.scrollDuration,
         curve: Curves.easeInOutCubic,
       );
-    } else {
-      Future.delayed(const Duration(milliseconds: 100), scrollToCurrentHour);
+    } else if (retryCount < AppConstants.maxScrollRetries) {
+      Future.delayed(
+        AppConstants.scrollToRetryDelay,
+        () => scrollToCurrentHour(retryCount: retryCount + 1),
+      );
     }
   }
 
@@ -254,10 +259,13 @@ class WeatherController extends GetxController {
     );
 
     await isar.writeTxn(() async {
-      if ((await isar.mainWeatherCaches.where().findAll()).isEmpty) {
+      final hasMainWeather = await isar.mainWeatherCaches.where().isEmpty();
+      final hasLocation = await isar.locationCaches.where().isEmpty();
+
+      if (hasMainWeather) {
         await isar.mainWeatherCaches.put(_mainWeather.value);
       }
-      if ((await isar.locationCaches.where().findAll()).isEmpty) {
+      if (hasLocation) {
         await isar.locationCaches.put(locationCaches);
       }
     });
@@ -274,7 +282,8 @@ class WeatherController extends GetxController {
           .timestampLessThan(cacheExpiry)
           .deleteAll(),
     );
-    if ((await isar.mainWeatherCaches.where().findAll()).isEmpty) {
+
+    if (await isar.mainWeatherCaches.where().isEmpty()) {
       await flutterLocalNotificationsPlugin.cancelAll();
     }
   }
@@ -450,15 +459,22 @@ class WeatherController extends GetxController {
     await isar.writeTxn(() => isar.weatherCards.delete(weatherCard.id));
   }
 
-  int getTime(List<String> time, String timezone) => time.indexWhere((t) {
-    final dateTime = DateTime.parse(t);
-    return tz.TZDateTime.now(tz.getLocation(timezone)).hour == dateTime.hour &&
-        tz.TZDateTime.now(tz.getLocation(timezone)).day == dateTime.day;
-  });
+  int getTime(List<String> time, String timezone) {
+    final tzLocation = tz.getLocation(timezone);
+    final tzNow = tz.TZDateTime.now(tzLocation);
 
-  int getDay(List<DateTime> time, String timezone) => time.indexWhere(
-    (t) => tz.TZDateTime.now(tz.getLocation(timezone)).day == t.day,
-  );
+    return time.indexWhere((t) {
+      final dateTime = DateTime.parse(t);
+      return tzNow.hour == dateTime.hour && tzNow.day == dateTime.day;
+    });
+  }
+
+  int getDay(List<DateTime> time, String timezone) {
+    final tzLocation = tz.getLocation(timezone);
+    final tzNow = tz.TZDateTime.now(tzLocation);
+
+    return time.indexWhere((t) => tzNow.day == t.day);
+  }
 
   TimeOfDay parseTime(String? timeStr) {
     if (timeStr == null) {
