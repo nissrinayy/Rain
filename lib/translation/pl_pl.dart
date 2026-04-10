@@ -11,6 +11,14 @@ class PlPl {
     'description3':
         'Jeśli napotkasz jakiekolwiek problemy, skontaktuj się z nami drogą e-mailową lub w recenzjach aplikacji.',
     'next': 'Dalej',
+    'skip': 'Pomiń',
+    'editCityHint': 'Edytuj informacje o mieście',
+    'createCityHint': 'Wyszukaj lub wprowadź dane miasta ręcznie',
+    'unsavedChanges': 'Niezapisane zmiany',
+    'discardChanges': 'Czy na pewno chcesz odrzucić zmiany?',
+    'discard': 'Odrzuć',
+    'save': 'Zapisz',
+    'ready': 'Gotowe',
     'search': 'Szukaj...',
     'loading': 'Ładowanie...',
     'searchCity': 'Znajdź swoje miasto',
@@ -127,6 +135,7 @@ class PlPl {
     'searchMethod': 'Użyj wyszukiwania lub geolokalizacji',
     'done': 'Gotowe',
     'groups': 'Nasze grupy',
+    'aboutApp': 'O aplikacji',
     'openMeteo': 'Dane z Open-Meteo (CC-BY 4.0)',
     'hourlyVariables': 'Godzinowe zmienne pogodowe',
     'dailyVariables': 'Dzienne zmienne pogodowe',
@@ -139,5 +148,9 @@ class PlPl {
     'hideMap': 'Ukryj mapę',
     'edit': 'Edytuj',
     'no_desc_data': 'Brak danych',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Wystąpił błąd',
+    'location_not_found': 'Nie udało się określić Twojej lokalizacji',
   };
 }

@@ -11,6 +11,14 @@ class EnUs {
     'description3':
         'If you encounter any issues, please contact us via email or in the application reviews.',
     'next': 'Next',
+    'skip': 'Skip',
+    'editCityHint': 'Edit city information',
+    'createCityHint': 'Search or enter city data manually',
+    'unsavedChanges': 'Unsaved changes',
+    'discardChanges': 'Are you sure you want to discard your changes?',
+    'discard': 'Discard',
+    'save': 'Save',
+    'ready': 'Ready',
     'search': 'Search...',
     'loading': 'Loading...',
     'searchCity': 'Find your city',
@@ -128,6 +136,7 @@ class EnUs {
     'searchMethod': 'Use search or geolocation',
     'done': 'Done',
     'groups': 'Our groups',
+    'aboutApp': 'About the app',
     'openMeteo': 'Data by Open-Meteo (CC-BY 4.0)',
     'hourlyVariables': 'Hourly weather variables',
     'dailyVariables': 'Daily weather variables',
@@ -140,5 +149,9 @@ class EnUs {
     'hideMap': 'Hide map',
     'edit': 'Edit',
     'no_desc_data': 'No data',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'An error occurred',
+    'location_not_found': 'Unable to determine your location',
   };
 }

@@ -11,6 +11,14 @@ class HuHu {
     'description3':
         'Ha bármilyen problémája adódik, kérjük, lépjen kapcsolatba velünk e-mailben vagy az alkalmazás értékeléseiben.',
     'next': 'Tovább',
+    'skip': 'Kihagyás',
+    'editCityHint': 'Városi információk szerkesztése',
+    'createCityHint': 'Keresse meg vagy adja meg manuálisan a város adatait',
+    'unsavedChanges': 'Nem mentett módosítások',
+    'discardChanges': 'Biztosan el akarja vetni a módosításait?',
+    'discard': 'Elvetés',
+    'save': 'Mentés',
+    'ready': 'Kész',
     'search': 'Keresés...',
     'loading': 'Betöltés...',
     'searchCity': 'Keresse meg a városát',
@@ -128,6 +136,7 @@ class HuHu {
     'searchMethod': 'Használja a keresést vagy a földrajzi helyet',
     'done': 'Kész',
     'groups': 'Csoportjaink',
+    'aboutApp': 'Az alkalmazásról',
     'openMeteo': 'Adatok az Open-Meteo-tól (CC-BY 4.0)',
     'hourlyVariables': 'Óránkénti időjárási változók',
     'dailyVariables': 'Napi időjárási változók',
@@ -140,5 +149,9 @@ class HuHu {
     'hideMap': 'Térkép elrejtése',
     'edit': 'Szerkesztés',
     'no_desc_data': 'Nincs adat',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Hiba történt',
+    'location_not_found': 'Nem sikerült meghatározni a tartózkodási helyét',
   };
 }

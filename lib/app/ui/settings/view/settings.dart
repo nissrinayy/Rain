@@ -13,11 +13,14 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rain/app/controller/controller.dart';
 import 'package:rain/app/data/db.dart';
-import 'package:rain/app/ui/settings/widgets/setting_card.dart';
+import 'package:rain/app/ui/settings/widgets/selection_dialog.dart';
+import 'package:rain/app/ui/settings/widgets/settings_section.dart';
+import 'package:rain/app/ui/settings/widgets/settings_tile.dart';
+import 'package:rain/app/ui/widgets/confirmation_dialog.dart';
+import 'package:rain/app/utils/navigation_helper.dart';
 import 'package:rain/main.dart';
 import 'package:rain/theme/theme_controller.dart';
 import 'package:rain/app/utils/color_converter.dart';
-import 'package:rain/app/utils/show_snack_bar.dart';
 import 'package:restart_app/restart_app.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -29,7 +32,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   final themeController = Get.put(ThemeController());
-  final weatherController = Get.put(WeatherController());
+  final weatherController = Get.find<WeatherController>();
   String? appVersion;
   String? colorBackground;
   String? colorText;
@@ -42,1217 +45,837 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _infoVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
-    setState(() {
-      appVersion = packageInfo.version;
-    });
+    setState(() => appVersion = packageInfo.version);
   }
 
-  void _updateLanguage(Locale locale) {
+  String _safeFormatTime(String? timeStr) {
+    try {
+      return weatherController.formatTime(timeStr);
+    } catch (e) {
+      return '--:--';
+    }
+  }
+
+  Future<void> _updateLanguage(Locale locale) async {
     settings.language = '$locale';
-    isar.writeTxnSync(() => isar.settings.putSync(settings));
+    await isar.writeTxn(() => isar.settings.put(settings));
     Get.updateLocale(locale);
-    Get.back();
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _buildAppearanceCard(context),
-          _buildFunctionsCard(context),
-          _buildDataCard(context),
-          _buildWidgetCard(context),
-          _buildMapCard(context),
-          _buildLanguageCard(context),
-          _buildGroupsCard(context),
-          _buildLicenseCard(context),
-          _buildVersionCard(context),
-          _buildGitHubCard(context),
-          _buildOpenMeteoText(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAppearanceCard(BuildContext context) {
-    return SettingCard(
-      icon: const Icon(IconsaxPlusLinear.brush_1),
-      text: 'appearance'.tr,
-      onPressed: () {
-        _showAppearanceBottomSheet(context);
-      },
-    );
-  }
-
-  void _showAppearanceBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom,
-          ),
-          child: StatefulBuilder(
-            builder: (BuildContext context, setState) {
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildAppearanceTitle(context),
-                    _buildThemeSettingCard(context, setState),
-                    _buildAmoledThemeSettingCard(context, setState),
-                    _buildMaterialColorSettingCard(context, setState),
-                    _buildLargeElementSettingCard(context, setState),
-                    const Gap(10),
-                  ],
-                ),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildAppearanceTitle(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Text(
-        'appearance'.tr,
-        style: context.textTheme.titleLarge?.copyWith(fontSize: 20),
-      ),
-    );
-  }
-
-  Widget _buildThemeSettingCard(BuildContext context, StateSetter setState) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.moon),
-      text: 'theme'.tr,
-      dropdown: true,
-      dropdownName: settings.theme?.tr,
-      dropdownList: <String>['system'.tr, 'dark'.tr, 'light'.tr],
-      dropdownChange: (String? newValue) {
-        _updateTheme(newValue, context, setState);
-      },
-    );
-  }
-
-  void _updateTheme(
-    String? newValue,
-    BuildContext context,
-    StateSetter setState,
-  ) {
-    ThemeMode themeMode = newValue?.tr == 'system'.tr
-        ? ThemeMode.system
-        : newValue?.tr == 'dark'.tr
-        ? ThemeMode.dark
-        : ThemeMode.light;
-    String theme = newValue?.tr == 'system'.tr
-        ? 'system'
-        : newValue?.tr == 'dark'.tr
-        ? 'dark'
-        : 'light';
-    themeController.saveTheme(theme);
-    themeController.changeThemeMode(themeMode);
-    setState(() {});
-  }
-
-  Widget _buildAmoledThemeSettingCard(
-    BuildContext context,
-    StateSetter setState,
-  ) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.mobile),
-      text: 'amoledTheme'.tr,
-      switcher: true,
-      value: settings.amoledTheme,
-      onChange: (value) {
-        themeController.saveOledTheme(value);
-        MyApp.updateAppState(context, newAmoledTheme: value);
-      },
-    );
-  }
-
-  Widget _buildMaterialColorSettingCard(
-    BuildContext context,
-    StateSetter setState,
-  ) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.colorfilter),
-      text: 'materialColor'.tr,
-      switcher: true,
-      value: settings.materialColor,
-      onChange: (value) {
-        themeController.saveMaterialTheme(value);
-        MyApp.updateAppState(context, newMaterialColor: value);
-      },
-    );
-  }
-
-  Widget _buildLargeElementSettingCard(
-    BuildContext context,
-    StateSetter setState,
-  ) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.additem),
-      text: 'largeElement'.tr,
-      switcher: true,
-      value: settings.largeElement,
-      onChange: (value) {
-        settings.largeElement = value;
-        isar.writeTxnSync(() => isar.settings.putSync(settings));
-        MyApp.updateAppState(context, newLargeElement: value);
-        setState(() {});
-      },
-    );
-  }
-
-  Widget _buildFunctionsCard(BuildContext context) {
-    return SettingCard(
-      icon: const Icon(IconsaxPlusLinear.code_1),
-      text: 'functions'.tr,
-      onPressed: () {
-        _showFunctionsBottomSheet(context);
-      },
-    );
-  }
-
-  void _showFunctionsBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom,
-          ),
-          child: StatefulBuilder(
-            builder: (BuildContext context, setState) {
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildFunctionsTitle(context),
-                    _buildLocationSettingCard(context, setState),
-                    _buildNotificationsSettingCard(context, setState),
-                    _buildTimeRangeSettingCard(context, setState),
-                    _buildTimeStartSettingCard(context, setState),
-                    _buildTimeEndSettingCard(context, setState),
-                    const Gap(10),
-                  ],
-                ),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildFunctionsTitle(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Text(
-        'functions'.tr,
-        style: context.textTheme.titleLarge?.copyWith(fontSize: 20),
-      ),
-    );
-  }
-
-  Widget _buildLocationSettingCard(BuildContext context, StateSetter setState) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.map),
-      text: 'location'.tr,
-      switcher: true,
-      value: settings.location,
-      onChange: (value) async {
-        if (value) {
-          bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-          if (!serviceEnabled) {
-            if (!context.mounted) return;
-            await _showLocationDialog(context);
-            return;
-          }
-          weatherController.getCurrentLocation();
-        }
-        isar.writeTxnSync(() {
-          settings.location = value;
-          isar.settings.putSync(settings);
-        });
-        setState(() {});
-      },
-    );
-  }
-
-  Future<void> _showLocationDialog(BuildContext context) async {
-    await showAdaptiveDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog.adaptive(
-          title: Text('location'.tr, style: context.textTheme.titleLarge),
-          content: Text('no_location'.tr, style: context.textTheme.titleMedium),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(result: false),
-              child: Text(
-                'cancel'.tr,
-                style: context.textTheme.titleMedium?.copyWith(
-                  color: Colors.blueAccent,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Geolocator.openLocationSettings();
-                Get.back(result: true);
-              },
-              child: Text(
-                'settings'.tr,
-                style: context.textTheme.titleMedium?.copyWith(
-                  color: Colors.green,
-                ),
-              ),
-            ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildAppearanceSection(context),
+            const Gap(24),
+            _buildFunctionsSection(context),
+            const Gap(24),
+            _buildDataSection(context),
+            const Gap(24),
+            _buildWidgetSection(context),
+            const Gap(24),
+            _buildMapSection(context),
+            const Gap(24),
+            _buildLanguageSection(context),
+            const Gap(24),
+            _buildGroupsSection(context),
+            const Gap(24),
+            _buildAboutSection(context),
+            const Gap(16),
+            _buildOpenMeteoText(context),
+            const Gap(16),
           ],
-        );
+        ),
+      ),
+    );
+  }
+
+  // ==================== SECTIONS ====================
+
+  Widget _buildAppearanceSection(BuildContext context) {
+    return SettingsSection(
+      title: 'appearance',
+      icon: IconsaxPlusBold.brush_1,
+      children: [
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.moon),
+          title: 'theme',
+          value: settings.theme?.tr ?? 'system'.tr,
+          onTap: () => _showThemeDialog(context),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.mobile),
+          title: 'amoledTheme',
+          trailing: Transform.scale(
+            scale: 0.8,
+            child: Switch(
+              value: settings.amoledTheme,
+              onChanged: (value) async {
+                await themeController.saveOledTheme(value);
+                if (!mounted) return;
+                MyApp.updateAppState(this.context, newAmoledTheme: value);
+                setState(() {});
+              },
+            ),
+          ),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.colorfilter),
+          title: 'materialColor',
+          trailing: Transform.scale(
+            scale: 0.8,
+            child: Switch(
+              value: settings.materialColor,
+              onChanged: (value) async {
+                await themeController.saveMaterialTheme(value);
+                if (!mounted) return;
+                MyApp.updateAppState(this.context, newMaterialColor: value);
+                setState(() {});
+              },
+            ),
+          ),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.additem),
+          title: 'largeElement',
+          trailing: Transform.scale(
+            scale: 0.8,
+            child: Switch(
+              value: settings.largeElement,
+              onChanged: (value) async {
+                settings.largeElement = value;
+                await isar.writeTxn(() => isar.settings.put(settings));
+                if (!mounted) return;
+                MyApp.updateAppState(this.context, newLargeElement: value);
+                setState(() {});
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFunctionsSection(BuildContext context) {
+    return SettingsSection(
+      title: 'functions',
+      icon: IconsaxPlusBold.code_1,
+      children: [
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.map),
+          title: 'location',
+          trailing: Transform.scale(
+            scale: 0.8,
+            child: Switch(
+              value: settings.location,
+              onChanged: (value) => _onLocationChanged(value, context),
+            ),
+          ),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.notification_1),
+          title: 'notifications',
+          trailing: Transform.scale(
+            scale: 0.8,
+            child: Switch(
+              value: settings.notifications,
+              onChanged: (value) => _onNotificationsChanged(value),
+            ),
+          ),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.notification_status),
+          title: 'timeRange',
+          value: '$timeRange',
+          onTap: () => _showTimeRangeDialog(context),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.timer_start),
+          title: 'timeStart',
+          value: _safeFormatTime(timeStart),
+          onTap: () => _showTimeStartPicker(context),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.timer_pause),
+          title: 'timeEnd',
+          value: _safeFormatTime(timeEnd),
+          onTap: () => _showTimeEndPicker(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDataSection(BuildContext context) {
+    return SettingsSection(
+      title: 'data',
+      icon: IconsaxPlusBold.d_square,
+      children: [
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.cloud_notif),
+          title: 'roundDegree',
+          trailing: Transform.scale(
+            scale: 0.8,
+            child: Switch(
+              value: settings.roundDegree,
+              onChanged: (value) async {
+                settings.roundDegree = value;
+                await isar.writeTxn(() => isar.settings.put(settings));
+                if (!mounted) return;
+                MyApp.updateAppState(this.context, newRoundDegree: value);
+                setState(() {});
+              },
+            ),
+          ),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.sun_1),
+          title: 'degrees',
+          value: settings.degrees.tr,
+          onTap: () => _showDegreesDialog(context),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.rulerpen),
+          title: 'measurements',
+          value: settings.measurements.tr,
+          onTap: () => _showMeasurementsDialog(context),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.wind),
+          title: 'wind',
+          value: settings.wind.tr,
+          onTap: () => _showWindDialog(context),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.ruler),
+          title: 'pressure',
+          value: settings.pressure.tr,
+          onTap: () => _showPressureDialog(context),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.clock_1),
+          title: 'timeformat',
+          value: settings.timeformat.tr,
+          onTap: () => _showTimeFormatDialog(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWidgetSection(BuildContext context) {
+    return SettingsSection(
+      title: 'widget',
+      icon: IconsaxPlusBold.setting_3,
+      children: [
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.add_square),
+          title: 'addWidget',
+          onTap: () => _requestPinWidget(),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.bucket_square),
+          title: 'widgetBackground',
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                backgroundColor: Theme.of(context).dividerColor,
+                radius: 11,
+                child: CircleAvatar(
+                  backgroundColor: widgetBackgroundColor.isEmpty
+                      ? Theme.of(context).primaryColor
+                      : HexColor.fromHex(widgetBackgroundColor),
+                  radius: 10,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                IconsaxPlusLinear.arrow_right_3,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+          onTap: () => _showBackgroundPicker(context),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.text_block),
+          title: 'widgetText',
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                backgroundColor: Theme.of(context).dividerColor,
+                radius: 11,
+                child: CircleAvatar(
+                  backgroundColor: widgetTextColor.isEmpty
+                      ? Theme.of(context).primaryColor
+                      : HexColor.fromHex(widgetTextColor),
+                  radius: 10,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                IconsaxPlusLinear.arrow_right_3,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+          onTap: () => _showTextColorPicker(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMapSection(BuildContext context) {
+    return SettingsSection(
+      title: 'map',
+      icon: IconsaxPlusBold.map,
+      children: [
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.location_slash),
+          title: 'hideMap',
+          trailing: Transform.scale(
+            scale: 0.8,
+            child: Switch(
+              value: settings.hideMap,
+              onChanged: (value) async {
+                settings.hideMap = value;
+                await isar.writeTxn(() => isar.settings.put(settings));
+                if (!mounted) return;
+                setState(() {});
+                Future.delayed(
+                  const Duration(milliseconds: 500),
+                  () => Restart.restartApp(),
+                );
+              },
+            ),
+          ),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.trash_square),
+          title: 'clearCacheStore',
+          onTap: () => _showClearCacheDialog(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLanguageSection(BuildContext context) {
+    final currentLanguage = appLanguages.firstWhere(
+      (element) => (element['locale'] == locale),
+      orElse: () => {'name': ''},
+    )['name'];
+
+    return SettingsSection(
+      title: 'language',
+      icon: IconsaxPlusBold.language_square,
+      children: [
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.language_square),
+          title: 'language',
+          value: currentLanguage,
+          onTap: () => _showLanguageDialog(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGroupsSection(BuildContext context) {
+    return SettingsSection(
+      title: 'groups',
+      icon: IconsaxPlusBold.link_square,
+      children: [
+        SettingsTile(
+          leading: const Icon(LineAwesomeIcons.discord),
+          title: 'discord'.tr,
+          onTap: () =>
+              weatherController.urlLauncher('https://discord.gg/JMMa9aHh8f'),
+        ),
+        SettingsTile(
+          leading: const Icon(LineAwesomeIcons.telegram),
+          title: 'telegram'.tr,
+          onTap: () =>
+              weatherController.urlLauncher('https://t.me/darkmoonightX'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAboutSection(BuildContext context) {
+    return SettingsSection(
+      title: 'aboutApp',
+      icon: IconsaxPlusBold.info_circle,
+      children: [
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.document_text),
+          title: 'license',
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => LicensePage(
+                  applicationIcon: Container(
+                    width: 100,
+                    height: 100,
+                    margin: const EdgeInsets.symmetric(vertical: 5),
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      image: DecorationImage(
+                        image: AssetImage('assets/icons/icon.png'),
+                      ),
+                    ),
+                  ),
+                  applicationName: 'Rain',
+                  applicationVersion: appVersion,
+                ),
+              ),
+            );
+          },
+        ),
+        SettingsTile(
+          leading: const Icon(LineAwesomeIcons.github),
+          title: '${'project'.tr} GitHub',
+          onTap: () => weatherController.urlLauncher(
+            'https://github.com/darkmoonight/Rain',
+          ),
+        ),
+        SettingsTile(
+          leading: const Icon(IconsaxPlusLinear.hierarchy_square_2),
+          title: 'version',
+          value: appVersion ?? '...',
+        ),
+      ],
+    );
+  }
+
+  // ==================== DIALOGS ====================
+
+  void _showThemeDialog(BuildContext context) {
+    showSelectionDialog<String>(
+      context: context,
+      title: 'theme'.tr,
+      icon: IconsaxPlusBold.moon,
+      items: ['system', 'dark', 'light'],
+      currentValue: settings.theme ?? 'system',
+      itemBuilder: (theme) => theme.tr,
+      onSelected: (value) async {
+        ThemeMode mode = value == 'system'
+            ? ThemeMode.system
+            : value == 'dark'
+            ? ThemeMode.dark
+            : ThemeMode.light;
+        await themeController.saveTheme(value);
+        themeController.changeThemeMode(mode);
+        if (!mounted) return;
+        setState(() {});
       },
     );
   }
 
-  Widget _buildNotificationsSettingCard(
-    BuildContext context,
-    StateSetter setState,
-  ) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.notification_1),
-      text: 'notifications'.tr,
-      switcher: true,
-      value: settings.notifications,
-      onChange: (value) async {
-        final resultExact = await flutterLocalNotificationsPlugin
-            .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin
-            >()
-            ?.requestExactAlarmsPermission();
-        final result = Platform.isIOS
-            ? await flutterLocalNotificationsPlugin
-                  .resolvePlatformSpecificImplementation<
-                    IOSFlutterLocalNotificationsPlugin
-                  >()
-                  ?.requestPermissions()
-            : await flutterLocalNotificationsPlugin
-                  .resolvePlatformSpecificImplementation<
-                    AndroidFlutterLocalNotificationsPlugin
-                  >()
-                  ?.requestNotificationsPermission();
-        if (result != null && resultExact != null) {
-          isar.writeTxnSync(() {
-            settings.notifications = value;
-            isar.settings.putSync(settings);
-          });
-          if (value) {
-            weatherController.notification(weatherController.mainWeather);
-          } else {
-            flutterLocalNotificationsPlugin.cancelAll();
-          }
-          setState(() {});
-        }
-      },
-    );
-  }
-
-  Widget _buildTimeRangeSettingCard(
-    BuildContext context,
-    StateSetter setState,
-  ) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.notification_status),
-      text: 'timeRange'.tr,
-      dropdown: true,
-      dropdownName: '$timeRange',
-      dropdownList: const <String>['1', '2', '3', '4', '5'],
-      dropdownChange: (String? newValue) {
-        isar.writeTxnSync(() {
-          settings.timeRange = int.parse(newValue!);
-          isar.settings.putSync(settings);
-        });
-        MyApp.updateAppState(context, newTimeRange: int.parse(newValue!));
+  void _showTimeRangeDialog(BuildContext context) {
+    showSelectionDialog<String>(
+      context: context,
+      title: 'timeRange'.tr,
+      icon: IconsaxPlusLinear.notification_status,
+      items: const ['1', '2', '3', '4', '5'],
+      currentValue: '$timeRange',
+      itemBuilder: (value) => value,
+      onSelected: (value) async {
+        settings.timeRange = int.parse(value);
+        await isar.writeTxn(() => isar.settings.put(settings));
+        if (!mounted) return;
+        MyApp.updateAppState(this.context, newTimeRange: int.parse(value));
         if (settings.notifications) {
           flutterLocalNotificationsPlugin.cancelAll();
           weatherController.notification(weatherController.mainWeather);
         }
-      },
-    );
-  }
-
-  Widget _buildTimeStartSettingCard(
-    BuildContext context,
-    StateSetter setState,
-  ) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.timer_start),
-      text: 'timeStart'.tr,
-      info: true,
-      infoSettings: true,
-      infoWidget: _TextInfo(info: weatherController.formatTime(timeStart)),
-      onPressed: () async {
-        final TimeOfDay? timeStartPicker = await showTimePicker(
-          context: context,
-          initialTime: weatherController.parseTime(timeStart),
-          builder: (context, child) {
-            final Widget mediaQueryWrapper = MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                alwaysUse24HourFormat: settings.timeformat == '12'
-                    ? false
-                    : true,
-              ),
-              child: child!,
-            );
-            return mediaQueryWrapper;
-          },
-        );
-        if (timeStartPicker != null) {
-          final String time24h = weatherController.timeTo24h(timeStartPicker);
-          isar.writeTxnSync(() {
-            settings.timeStart = time24h;
-            isar.settings.putSync(settings);
-          });
-          if (!context.mounted) return;
-          MyApp.updateAppState(context, newTimeStart: time24h);
-          if (settings.notifications) {
-            flutterLocalNotificationsPlugin.cancelAll();
-            weatherController.notification(weatherController.mainWeather);
-          }
-          setState(() {});
-        }
-      },
-    );
-  }
-
-  Widget _buildTimeEndSettingCard(BuildContext context, StateSetter setState) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.timer_pause),
-      text: 'timeEnd'.tr,
-      info: true,
-      infoSettings: true,
-      infoWidget: _TextInfo(info: weatherController.formatTime(timeEnd)),
-      onPressed: () async {
-        final TimeOfDay? timeEndPicker = await showTimePicker(
-          context: context,
-          initialTime: weatherController.parseTime(timeEnd),
-          builder: (context, child) {
-            final Widget mediaQueryWrapper = MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                alwaysUse24HourFormat: settings.timeformat == '12'
-                    ? false
-                    : true,
-              ),
-              child: child!,
-            );
-            return mediaQueryWrapper;
-          },
-        );
-        if (timeEndPicker != null) {
-          final String time24h = weatherController.timeTo24h(timeEndPicker);
-          isar.writeTxnSync(() {
-            settings.timeEnd = time24h;
-            isar.settings.putSync(settings);
-          });
-          if (!context.mounted) return;
-          MyApp.updateAppState(context, newTimeEnd: time24h);
-          if (settings.notifications) {
-            flutterLocalNotificationsPlugin.cancelAll();
-            weatherController.notification(weatherController.mainWeather);
-          }
-          setState(() {});
-        }
-      },
-    );
-  }
-
-  Widget _buildDataCard(BuildContext context) {
-    return SettingCard(
-      icon: const Icon(IconsaxPlusLinear.d_square),
-      text: 'data'.tr,
-      onPressed: () {
-        _showDataBottomSheet(context);
-      },
-    );
-  }
-
-  void _showDataBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom,
-          ),
-          child: StatefulBuilder(
-            builder: (BuildContext context, setState) {
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildDataTitle(context),
-                    _buildRoundDegreeSettingCard(context, setState),
-                    _buildDegreesSettingCard(context, setState),
-                    _buildMeasurementsSettingCard(context, setState),
-                    _buildWindSettingCard(context, setState),
-                    _buildPressureSettingCard(context, setState),
-                    _buildTimeFormatSettingCard(context, setState),
-                    const Gap(10),
-                  ],
-                ),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildDataTitle(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Text(
-        'data'.tr,
-        style: context.textTheme.titleLarge?.copyWith(fontSize: 20),
-      ),
-    );
-  }
-
-  Widget _buildRoundDegreeSettingCard(
-    BuildContext context,
-    StateSetter setState,
-  ) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.cloud_notif),
-      text: 'roundDegree'.tr,
-      switcher: true,
-      value: settings.roundDegree,
-      onChange: (value) {
-        settings.roundDegree = value;
-        isar.writeTxnSync(() => isar.settings.putSync(settings));
-        MyApp.updateAppState(context, newRoundDegree: value);
         setState(() {});
       },
     );
   }
 
-  Widget _buildDegreesSettingCard(BuildContext context, StateSetter setState) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.sun_1),
-      text: 'degrees'.tr,
-      dropdown: true,
-      dropdownName: settings.degrees.tr,
-      dropdownList: <String>['celsius'.tr, 'fahrenheit'.tr],
-      dropdownChange: (String? newValue) async {
-        isar.writeTxnSync(() {
-          settings.degrees = newValue == 'celsius'.tr
-              ? 'celsius'
-              : 'fahrenheit';
-          isar.settings.putSync(settings);
-        });
+  void _showDegreesDialog(BuildContext context) {
+    showSelectionDialog<String>(
+      context: context,
+      title: 'degrees'.tr,
+      icon: IconsaxPlusLinear.sun_1,
+      items: ['celsius', 'fahrenheit'],
+      currentValue: settings.degrees,
+      itemBuilder: (value) => value.tr,
+      onSelected: (value) async {
+        settings.degrees = value;
+        await isar.writeTxn(() => isar.settings.put(settings));
         await weatherController.deleteAll(false);
         await weatherController.setLocation();
         await weatherController.updateCacheCard(true);
+        if (!mounted) return;
         setState(() {});
       },
     );
   }
 
-  Widget _buildMeasurementsSettingCard(
-    BuildContext context,
-    StateSetter setState,
-  ) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.rulerpen),
-      text: 'measurements'.tr,
-      dropdown: true,
-      dropdownName: settings.measurements.tr,
-      dropdownList: <String>['metric'.tr, 'imperial'.tr],
-      dropdownChange: (String? newValue) async {
-        isar.writeTxnSync(() {
-          settings.measurements = newValue == 'metric'.tr
-              ? 'metric'
-              : 'imperial';
-          isar.settings.putSync(settings);
-        });
+  void _showMeasurementsDialog(BuildContext context) {
+    showSelectionDialog<String>(
+      context: context,
+      title: 'measurements'.tr,
+      icon: IconsaxPlusLinear.rulerpen,
+      items: ['metric', 'imperial'],
+      currentValue: settings.measurements,
+      itemBuilder: (value) => value.tr,
+      onSelected: (value) async {
+        settings.measurements = value;
+        await isar.writeTxn(() => isar.settings.put(settings));
         await weatherController.deleteAll(false);
         await weatherController.setLocation();
         await weatherController.updateCacheCard(true);
+        if (!mounted) return;
         setState(() {});
       },
     );
   }
 
-  Widget _buildWindSettingCard(BuildContext context, StateSetter setState) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.wind),
-      text: 'wind'.tr,
-      dropdown: true,
-      dropdownName: settings.wind.tr,
-      dropdownList: <String>['kph'.tr, 'm/s'.tr],
-      dropdownChange: (String? newValue) async {
-        isar.writeTxnSync(() {
-          settings.wind = newValue == 'kph'.tr ? 'kph' : 'm/s';
-          isar.settings.putSync(settings);
-        });
-        setState(() {});
-      },
-    );
-  }
-
-  Widget _buildPressureSettingCard(BuildContext context, StateSetter setState) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.ruler),
-      text: 'pressure'.tr,
-      dropdown: true,
-      dropdownName: settings.pressure.tr,
-      dropdownList: <String>['hPa'.tr, 'mmHg'.tr],
-      dropdownChange: (String? newValue) async {
-        isar.writeTxnSync(() {
-          settings.pressure = newValue == 'hPa'.tr ? 'hPa' : 'mmHg';
-          isar.settings.putSync(settings);
-        });
-        setState(() {});
-      },
-    );
-  }
-
-  Widget _buildTimeFormatSettingCard(
-    BuildContext context,
-    StateSetter setState,
-  ) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.clock_1),
-      text: 'timeformat'.tr,
-      dropdown: true,
-      dropdownName: settings.timeformat.tr,
-      dropdownList: <String>['12'.tr, '24'.tr],
-      dropdownChange: (String? newValue) {
-        isar.writeTxnSync(() {
-          settings.timeformat = newValue == '12'.tr ? '12' : '24';
-          isar.settings.putSync(settings);
-        });
-        setState(() {});
-      },
-    );
-  }
-
-  Widget _buildWidgetCard(BuildContext context) {
-    return SettingCard(
-      icon: const Icon(IconsaxPlusLinear.setting_3),
-      text: 'widget'.tr,
-      onPressed: () {
-        _showWidgetBottomSheet(context);
-      },
-    );
-  }
-
-  void _showWidgetBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+  void _showWindDialog(BuildContext context) {
+    showSelectionDialog<String>(
       context: context,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom,
+      title: 'wind'.tr,
+      icon: IconsaxPlusLinear.wind,
+      items: ['kph', 'm/s'],
+      currentValue: settings.wind,
+      itemBuilder: (value) => value.tr,
+      onSelected: (value) async {
+        settings.wind = value;
+        await isar.writeTxn(() => isar.settings.put(settings));
+        if (!mounted) return;
+        setState(() {});
+      },
+    );
+  }
+
+  void _showPressureDialog(BuildContext context) {
+    showSelectionDialog<String>(
+      context: context,
+      title: 'pressure'.tr,
+      icon: IconsaxPlusLinear.ruler,
+      items: ['hPa', 'mmHg'],
+      currentValue: settings.pressure,
+      itemBuilder: (value) => value.tr,
+      onSelected: (value) async {
+        settings.pressure = value;
+        await isar.writeTxn(() => isar.settings.put(settings));
+        if (!mounted) return;
+        setState(() {});
+      },
+    );
+  }
+
+  void _showTimeFormatDialog(BuildContext context) {
+    showSelectionDialog<String>(
+      context: context,
+      title: 'timeformat'.tr,
+      icon: IconsaxPlusLinear.clock_1,
+      items: ['12', '24'],
+      currentValue: settings.timeformat,
+      itemBuilder: (value) => value.tr,
+      onSelected: (value) async {
+        settings.timeformat = value;
+        await isar.writeTxn(() => isar.settings.put(settings));
+        if (!mounted) return;
+        setState(() {});
+      },
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context) {
+    showSelectionDialog<Map<String, dynamic>>(
+      context: context,
+      title: 'language'.tr,
+      icon: IconsaxPlusLinear.language_square,
+      items: appLanguages,
+      currentValue: appLanguages.firstWhere(
+        (element) =>
+            (element['locale'] as Locale).languageCode == locale.languageCode,
+        orElse: () => <String, dynamic>{
+          'name': 'English',
+          'locale': const Locale('en', 'US'),
+        },
+      ),
+      itemBuilder: (lang) => lang['name'] as String,
+      onSelected: (value) {
+        MyApp.updateAppState(context, newLocale: value['locale']);
+        _updateLanguage(value['locale']);
+      },
+      enableSearch: true,
+    );
+  }
+
+  Future<void> _onLocationChanged(bool value, BuildContext context) async {
+    if (value) {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (!context.mounted) return;
+        await _showLocationDialog(context);
+        return;
+      }
+      weatherController.getCurrentLocation();
+    }
+    settings.location = value;
+    await isar.writeTxn(() => isar.settings.put(settings));
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  Future<bool> _showLocationDialog(BuildContext context) async {
+    return showConfirmationDialog(
+      context: context,
+      title: 'location'.tr,
+      message: 'no_location'.tr,
+      icon: IconsaxPlusBold.location,
+      confirmText: 'settings'.tr,
+      onConfirm: () => Geolocator.openLocationSettings(),
+    );
+  }
+
+  void _onNotificationsChanged(bool value) async {
+    final resultExact = await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.requestExactAlarmsPermission();
+    final result = Platform.isIOS
+        ? await flutterLocalNotificationsPlugin
+              .resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin
+              >()
+              ?.requestPermissions()
+        : await flutterLocalNotificationsPlugin
+              .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin
+              >()
+              ?.requestNotificationsPermission();
+    if (result != null && resultExact != null) {
+      settings.notifications = value;
+      await isar.writeTxn(() => isar.settings.put(settings));
+      if (value) {
+        weatherController.notification(weatherController.mainWeather);
+      } else {
+        flutterLocalNotificationsPlugin.cancelAll();
+      }
+      if (!mounted) return;
+      setState(() {});
+    }
+  }
+
+  Future<void> _showTimeStartPicker(BuildContext context) async {
+    final TimeOfDay? timeStartPicker = await showTimePicker(
+      context: context,
+      initialTime: weatherController.parseTime(timeStart),
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            alwaysUse24HourFormat: settings.timeformat == '12' ? false : true,
           ),
-          child: StatefulBuilder(
-            builder: (BuildContext context, setState) {
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildWidgetTitle(context),
-                    _buildAddWidgetSettingCard(context, setState),
-                    _buildWidgetBackgroundSettingCard(context, setState),
-                    _buildWidgetTextSettingCard(context, setState),
-                    const Gap(10),
-                  ],
+          child: child!,
+        );
+      },
+    );
+    if (timeStartPicker != null) {
+      final String time24h = weatherController.timeTo24h(timeStartPicker);
+      settings.timeStart = time24h;
+      await isar.writeTxn(() => isar.settings.put(settings));
+      if (!mounted) return;
+      MyApp.updateAppState(this.context, newTimeStart: time24h);
+      if (settings.notifications) {
+        flutterLocalNotificationsPlugin.cancelAll();
+        weatherController.notification(weatherController.mainWeather);
+      }
+      setState(() {});
+    }
+  }
+
+  Future<void> _showTimeEndPicker(BuildContext context) async {
+    final TimeOfDay? timeEndPicker = await showTimePicker(
+      context: context,
+      initialTime: weatherController.parseTime(timeEnd),
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            alwaysUse24HourFormat: settings.timeformat == '12' ? false : true,
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (timeEndPicker != null) {
+      final String time24h = weatherController.timeTo24h(timeEndPicker);
+      settings.timeEnd = time24h;
+      await isar.writeTxn(() => isar.settings.put(settings));
+      if (!mounted) return;
+      MyApp.updateAppState(this.context, newTimeEnd: time24h);
+      if (settings.notifications) {
+        flutterLocalNotificationsPlugin.cancelAll();
+        weatherController.notification(weatherController.mainWeather);
+      }
+      setState(() {});
+    }
+  }
+
+  Future<void> _requestPinWidget() async {
+    if (!Platform.isAndroid) return;
+
+    final supported = await HomeWidget.isRequestPinWidgetSupported() ?? false;
+    if (!supported) {
+      return;
+    }
+
+    await HomeWidget.requestPinWidget(
+      name: androidWidgetName,
+      androidName: androidWidgetName,
+      qualifiedAndroidName: 'com.yoshi.rain.OreoWidget',
+    );
+  }
+
+  void _showBackgroundPicker(BuildContext context) {
+    colorBackground = null;
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                child: Text(
+                  'widgetBackground'.tr,
+                  style: context.textTheme.titleMedium?.copyWith(fontSize: 18),
                 ),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildWidgetTitle(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Text(
-        'widget'.tr,
-        style: context.textTheme.titleLarge?.copyWith(fontSize: 20),
-      ),
-    );
-  }
-
-  Widget _buildAddWidgetSettingCard(
-    BuildContext context,
-    StateSetter setState,
-  ) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.add_square),
-      text: 'addWidget'.tr,
-      onPressed: () async {
-        if (!Platform.isAndroid) return;
-
-        final supported =
-            await HomeWidget.isRequestPinWidgetSupported() ?? false;
-        if (!supported) {
-          showSnackBar(content: 'addWidgetLauncher'.tr);
-          return;
-        }
-
-        await HomeWidget.requestPinWidget(
-          name: androidWidgetName,
-          androidName: androidWidgetName,
-          qualifiedAndroidName: 'com.yoshi.rain.OreoWidget',
-        );
-      },
-    );
-  }
-
-  Widget _buildWidgetBackgroundSettingCard(
-    BuildContext context,
-    StateSetter setState,
-  ) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.bucket_square),
-      text: 'widgetBackground'.tr,
-      info: true,
-      infoWidget: CircleAvatar(
-        backgroundColor: context.theme.dividerColor,
-        radius: 11,
-        child: CircleAvatar(
-          backgroundColor: widgetBackgroundColor.isEmpty
-              ? context.theme.primaryColor
-              : HexColor.fromHex(widgetBackgroundColor),
-          radius: 10,
-        ),
-      ),
-      onPressed: () {
-        colorBackground = null;
-        showDialog(
-          context: context,
-          builder: (context) => Dialog(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _buildWidgetBackgroundTitle(context),
-                  _buildColorPicker(context),
-                  _buildColorPickerButton(context),
-                ],
               ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildWidgetBackgroundTitle(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Text(
-        'widgetBackground'.tr,
-        style: context.textTheme.titleMedium?.copyWith(fontSize: 18),
-      ),
-    );
-  }
-
-  Widget _buildColorPicker(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      child: Theme(
-        data: context.theme.copyWith(
-          inputDecorationTheme: InputDecorationTheme(
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-        ),
-        child: ColorPicker(
-          color: widgetBackgroundColor.isEmpty
-              ? context.theme.primaryColor
-              : HexColor.fromHex(widgetBackgroundColor),
-          onChanged: (pickedColor) {
-            colorBackground = pickedColor.toHex();
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildColorPickerButton(BuildContext context) {
-    return IconButton(
-      icon: const Icon(IconsaxPlusLinear.tick_square),
-      onPressed: () {
-        if (colorBackground == null) {
-          return;
-        }
-        weatherController.updateWidgetBackgroundColor(colorBackground!);
-        MyApp.updateAppState(
-          context,
-          newWidgetBackgroundColor: colorBackground,
-        );
-        Get.back();
-      },
-    );
-  }
-
-  Widget _buildWidgetTextSettingCard(
-    BuildContext context,
-    StateSetter setState,
-  ) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.text_block),
-      text: 'widgetText'.tr,
-      info: true,
-      infoWidget: CircleAvatar(
-        backgroundColor: context.theme.dividerColor,
-        radius: 11,
-        child: CircleAvatar(
-          backgroundColor: widgetTextColor.isEmpty
-              ? context.theme.primaryColor
-              : HexColor.fromHex(widgetTextColor),
-          radius: 10,
-        ),
-      ),
-      onPressed: () {
-        colorText = null;
-        showDialog(
-          context: context,
-          builder: (context) => Dialog(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _buildWidgetTextTitle(context),
-                  _buildTextColorPicker(context),
-                  _buildTextColorPickerButton(context),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildWidgetTextTitle(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Text(
-        'widgetText'.tr,
-        style: context.textTheme.titleMedium?.copyWith(fontSize: 18),
-      ),
-    );
-  }
-
-  Widget _buildTextColorPicker(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      child: Theme(
-        data: context.theme.copyWith(
-          inputDecorationTheme: InputDecorationTheme(
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-        ),
-        child: ColorPicker(
-          color: widgetTextColor.isEmpty
-              ? context.theme.primaryColor
-              : HexColor.fromHex(widgetTextColor),
-          onChanged: (pickedColor) {
-            colorText = pickedColor.toHex();
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextColorPickerButton(BuildContext context) {
-    return IconButton(
-      icon: const Icon(IconsaxPlusLinear.tick_square),
-      onPressed: () {
-        if (colorText == null) {
-          return;
-        }
-        weatherController.updateWidgetTextColor(colorText!);
-        MyApp.updateAppState(context, newWidgetTextColor: colorText);
-        Get.back();
-      },
-    );
-  }
-
-  Widget _buildMapCard(BuildContext context) {
-    return SettingCard(
-      icon: const Icon(IconsaxPlusLinear.map),
-      text: 'map'.tr,
-      onPressed: () {
-        _showMapBottomSheet(context);
-      },
-    );
-  }
-
-  void _showMapBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom,
-          ),
-          child: StatefulBuilder(
-            builder: (BuildContext context, setState) {
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildMapTitle(context),
-                    _buildHideMapSettingCard(context, setState),
-                    _buildClearCacheStoreSettingCard(context),
-                    const Gap(10),
-                  ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: Theme(
+                  data: context.theme.copyWith(
+                    inputDecorationTheme: InputDecorationTheme(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  child: ColorPicker(
+                    color: widgetBackgroundColor.isEmpty
+                        ? context.theme.primaryColor
+                        : HexColor.fromHex(widgetBackgroundColor),
+                    onChanged: (pickedColor) =>
+                        colorBackground = pickedColor.toHex(),
+                  ),
                 ),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildMapTitle(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Text(
-        'map'.tr,
-        style: context.textTheme.titleLarge?.copyWith(fontSize: 20),
-      ),
-    );
-  }
-
-  Widget _buildHideMapSettingCard(BuildContext context, StateSetter setState) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.location_slash),
-      text: 'hideMap'.tr,
-      switcher: true,
-      value: settings.hideMap,
-      onChange: (value) {
-        settings.hideMap = value;
-        isar.writeTxnSync(() => isar.settings.putSync(settings));
-        setState(() {});
-        Future.delayed(
-          const Duration(milliseconds: 500),
-          () => Restart.restartApp(),
-        );
-      },
-    );
-  }
-
-  Widget _buildClearCacheStoreSettingCard(BuildContext context) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(IconsaxPlusLinear.trash_square),
-      text: 'clearCacheStore'.tr,
-      onPressed: () => _showClearCacheStoreDialog(context),
-    );
-  }
-
-  void _showClearCacheStoreDialog(BuildContext context) {
-    showAdaptiveDialog(
-      context: context,
-      builder: (context) => AlertDialog.adaptive(
-        title: Text(
-          'deletedCacheStore'.tr,
-          style: context.textTheme.titleLarge,
-        ),
-        content: Text(
-          'deletedCacheStoreQuery'.tr,
-          style: context.textTheme.titleMedium,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(
-              'cancel'.tr,
-              style: context.textTheme.titleMedium?.copyWith(
-                color: Colors.blueAccent,
               ),
-            ),
+              IconButton(
+                icon: const Icon(IconsaxPlusLinear.tick_square),
+                onPressed: () {
+                  if (colorBackground == null) return;
+                  weatherController.updateWidgetBackgroundColor(
+                    colorBackground!,
+                  );
+                  MyApp.updateAppState(
+                    context,
+                    newWidgetBackgroundColor: colorBackground,
+                  );
+                  NavigationHelper.back();
+                },
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              final dir = await getTemporaryDirectory();
-              final cacheStoreFuture = FileCacheStore(
-                '${dir.path}${Platform.pathSeparator}MapTiles',
-              );
-              cacheStoreFuture.clean();
-              Get.back();
-            },
-            child: Text(
-              'delete'.tr,
-              style: context.textTheme.titleMedium?.copyWith(color: Colors.red),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildLanguageCard(BuildContext context) {
-    return SettingCard(
-      icon: const Icon(IconsaxPlusLinear.language_square),
-      text: 'language'.tr,
-      info: true,
-      infoSettings: true,
-      infoWidget: _TextInfo(
-        info: appLanguages.firstWhere(
-          (element) => (element['locale'] == locale),
-          orElse: () => {'name': ''},
-        )['name'],
-      ),
-      onPressed: () {
-        _showLanguageBottomSheet(context);
-      },
-    );
-  }
-
-  void _showLanguageBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+  void _showTextColorPicker(BuildContext context) {
+    colorText = null;
+    showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom,
-          ),
-          child: StatefulBuilder(
-            builder: (BuildContext context, setState) {
-              return ListView(
-                children: [
-                  _buildLanguageTitle(context),
-                  _buildLanguageList(context),
-                  const Gap(10),
-                ],
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildLanguageTitle(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Text(
-        'language'.tr,
-        style: context.textTheme.titleLarge?.copyWith(fontSize: 20),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  Widget _buildLanguageList(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const BouncingScrollPhysics(),
-      itemCount: appLanguages.length,
-      itemBuilder: (context, index) {
-        return Card(
-          elevation: 4,
-          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          child: ListTile(
-            title: Text(
-              appLanguages[index]['name'],
-              style: context.textTheme.labelLarge,
-              textAlign: TextAlign.center,
-            ),
-            onTap: () {
-              MyApp.updateAppState(
-                context,
-                newLocale: appLanguages[index]['locale'],
-              );
-              _updateLanguage(appLanguages[index]['locale']);
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildGroupsCard(BuildContext context) {
-    return SettingCard(
-      icon: const Icon(IconsaxPlusLinear.link_square),
-      text: 'groups'.tr,
-      onPressed: () {
-        _showGroupsBottomSheet(context);
-      },
-    );
-  }
-
-  void _showGroupsBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom,
-          ),
-          child: StatefulBuilder(
-            builder: (BuildContext context, setState) {
-              return SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildGroupsTitle(context),
-                    _buildDiscordSettingCard(context),
-                    _buildTelegramSettingCard(context),
-                    const Gap(10),
-                  ],
+      builder: (context) => Dialog(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                child: Text(
+                  'widgetText'.tr,
+                  style: context.textTheme.titleMedium?.copyWith(fontSize: 18),
                 ),
-              );
-            },
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: Theme(
+                  data: context.theme.copyWith(
+                    inputDecorationTheme: InputDecorationTheme(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  child: ColorPicker(
+                    color: widgetTextColor.isEmpty
+                        ? context.theme.primaryColor
+                        : HexColor.fromHex(widgetTextColor),
+                    onChanged: (pickedColor) => colorText = pickedColor.toHex(),
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(IconsaxPlusLinear.tick_square),
+                onPressed: () {
+                  if (colorText == null) return;
+                  weatherController.updateWidgetTextColor(colorText!);
+                  MyApp.updateAppState(context, newWidgetTextColor: colorText);
+                  NavigationHelper.back();
+                },
+              ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showClearCacheDialog(BuildContext context) {
+    showConfirmationDialog(
+      context: context,
+      title: 'deletedCacheStore'.tr,
+      message: 'deletedCacheStoreQuery'.tr,
+      icon: IconsaxPlusBold.trash,
+      confirmText: 'delete'.tr,
+      isDestructive: true,
+      onConfirm: () async {
+        final dir = await getTemporaryDirectory();
+        final cacheStore = FileCacheStore(
+          '${dir.path}${Platform.pathSeparator}MapTiles',
         );
+        cacheStore.clean();
       },
     );
   }
 
-  Widget _buildGroupsTitle(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
+  // ==================== WIDGETS ====================
+
+  Widget _buildOpenMeteoText(BuildContext context) => GestureDetector(
+    child: Center(
       child: Text(
-        'groups'.tr,
-        style: context.textTheme.titleLarge?.copyWith(fontSize: 20),
-      ),
-    );
-  }
-
-  Widget _buildDiscordSettingCard(BuildContext context) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(LineAwesomeIcons.discord),
-      text: 'Discord',
-      onPressed: () =>
-          weatherController.urlLauncher('https://discord.gg/JMMa9aHh8f'),
-    );
-  }
-
-  Widget _buildTelegramSettingCard(BuildContext context) {
-    return SettingCard(
-      elevation: 4,
-      icon: const Icon(LineAwesomeIcons.telegram),
-      text: 'Telegram',
-      onPressed: () =>
-          weatherController.urlLauncher('https://t.me/darkmoonightX'),
-    );
-  }
-
-  Widget _buildLicenseCard(BuildContext context) {
-    return SettingCard(
-      icon: const Icon(IconsaxPlusLinear.document),
-      text: 'license'.tr,
-      onPressed: () => Get.to(
-        () => LicensePage(
-          applicationIcon: Container(
-            width: 100,
-            height: 100,
-            margin: const EdgeInsets.symmetric(vertical: 5),
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(20)),
-              image: DecorationImage(
-                image: AssetImage('assets/icons/icon.png'),
-              ),
-            ),
-          ),
-          applicationName: 'Rain',
-          applicationVersion: appVersion,
-        ),
-        transition: Transition.downToUp,
-      ),
-    );
-  }
-
-  Widget _buildVersionCard(BuildContext context) {
-    return SettingCard(
-      icon: const Icon(IconsaxPlusLinear.hierarchy_square_2),
-      text: 'version'.tr,
-      info: true,
-      infoWidget: _TextInfo(info: '$appVersion'),
-    );
-  }
-
-  Widget _buildGitHubCard(BuildContext context) {
-    return SettingCard(
-      icon: const Icon(LineAwesomeIcons.github),
-      text: '${'project'.tr} GitHub',
-      onPressed: () =>
-          weatherController.urlLauncher('https://github.com/darkmoonight/Rain'),
-    );
-  }
-
-  Widget _buildOpenMeteoText(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: GestureDetector(
-        child: Text(
-          'openMeteo'.tr,
-          style: context.textTheme.bodyMedium,
-          overflow: TextOverflow.visible,
-          textAlign: TextAlign.center,
-        ),
-        onTap: () => weatherController.urlLauncher('https://open-meteo.com/'),
-      ),
-    );
-  }
-}
-
-class _TextInfo extends StatelessWidget {
-  const _TextInfo({required this.info});
-
-  final String info;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 5),
-      child: Text(
-        info,
+        'openMeteo'.tr,
         style: context.textTheme.bodyMedium,
         overflow: TextOverflow.visible,
+        textAlign: TextAlign.center,
       ),
-    );
-  }
+    ),
+    onTap: () => weatherController.urlLauncher('https://open-meteo.com/'),
+  );
 }

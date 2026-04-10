@@ -8,57 +8,45 @@ class StatusWeather {
     String time,
     String timeDay,
     String timeNight,
-  ) {
-    return _getImageBasedOnTime(
-      weather,
-      time,
-      timeDay,
-      timeNight,
-      _getDayNightImagePaths,
-    );
-  }
+  ) => _getImageBasedOnTime(
+    weather,
+    time,
+    timeDay,
+    timeNight,
+    _getDayNightImagePaths,
+  );
 
-  String getImageNowDaily(int? weather) {
-    return _getDailyImage(weather);
-  }
+  String getImageNowDaily(int? weather) => _getDailyImage(weather);
 
   String getImageToday(
     int weather,
     String time,
     String timeDay,
     String timeNight,
-  ) {
-    return _getImageBasedOnTime(
-      weather,
-      time,
-      timeDay,
-      timeNight,
-      _getTodayImagePaths,
-    );
-  }
+  ) => _getImageBasedOnTime(
+    weather,
+    time,
+    timeDay,
+    timeNight,
+    _getTodayImagePaths,
+  );
 
-  String getImage7Day(int? weather) {
-    return _getDailyImage(weather, isDay: true);
-  }
+  String getImage7Day(int? weather) => _getDailyImage(weather, isDay: true);
 
-  String getText(int? weather) {
-    return _getWeatherText(weather);
-  }
+  String getText(int? weather) => _getWeatherText(weather);
 
   String getImageNotification(
     int weather,
     String time,
     String timeDay,
     String timeNight,
-  ) {
-    return _getImageBasedOnTime(
-      weather,
-      time,
-      timeDay,
-      timeNight,
-      _getNotificationImagePaths,
-    );
-  }
+  ) => _getImageBasedOnTime(
+    weather,
+    time,
+    timeDay,
+    timeNight,
+    _getNotificationImagePaths,
+  );
 
   String _getImageBasedOnTime(
     int weather,

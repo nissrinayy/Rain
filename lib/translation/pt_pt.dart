@@ -11,6 +11,14 @@ class PtPt {
     'description3':
         'Se encontrar algum problema, contacte-nos por e‑mail ou através das avaliações da aplicação.',
     'next': 'Seguinte',
+    'skip': 'Ignorar',
+    'editCityHint': 'Editar informações da cidade',
+    'createCityHint': 'Pesquise ou introduza dados da cidade manualmente',
+    'unsavedChanges': 'Alterações não guardadas',
+    'discardChanges': 'Tem a certeza de que deseja descartar as alterações?',
+    'discard': 'Descartar',
+    'save': 'Guardar',
+    'ready': 'Pronto',
     'search': 'Pesquisar...',
     'loading': 'A carregar...',
     'searchCity': 'Procure a sua cidade',
@@ -128,6 +136,7 @@ class PtPt {
     'searchMethod': 'Utilize a pesquisa ou a geolocalização',
     'done': 'Concluído',
     'groups': 'Os nossos grupos',
+    'aboutApp': 'Sobre a app',
     'openMeteo': 'Dados fornecidos por Open-Meteo (CC-BY 4.0)',
     'hourlyVariables': 'Variáveis meteorológicas horárias',
     'dailyVariables': 'Variáveis meteorológicas diárias',
@@ -140,5 +149,9 @@ class PtPt {
     'hideMap': 'Ocultar mapa',
     'edit': 'Editar',
     'no_desc_data': 'Sem dados',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Ocorreu um erro',
+    'location_not_found': 'Não foi possível determinar a sua localização',
   };
 }

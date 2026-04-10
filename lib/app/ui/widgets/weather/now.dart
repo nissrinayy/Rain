@@ -6,7 +6,7 @@ import 'package:rain/app/ui/widgets/weather/status/status_data.dart';
 import 'package:rain/app/ui/widgets/weather/status/status_weather.dart';
 import 'package:rain/main.dart';
 
-class Now extends StatefulWidget {
+class Now extends StatelessWidget {
   const Now({
     super.key,
     required this.weather,
@@ -29,31 +29,23 @@ class Now extends StatefulWidget {
   final double feels;
 
   @override
-  State<Now> createState() => _NowState();
-}
-
-class _NowState extends State<Now> {
-  final statusWeather = StatusWeather();
-  final statusData = StatusData();
-
-  @override
-  Widget build(BuildContext context) {
-    return largeElement
-        ? _buildLargeElementLayout(context)
-        : _buildCompactElementLayout(context);
-  }
+  Widget build(BuildContext context) => largeElement
+      ? _buildLargeElementLayout(context)
+      : _buildCompactElementLayout(context);
 
   Widget _buildLargeElementLayout(BuildContext context) {
+    final statusWeather = StatusWeather();
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Gap(15),
-          _buildWeatherImage(200),
-          _buildTemperatureText(context, widget.degree, 90),
+          _buildWeatherImage(statusWeather, 200),
+          _buildTemperatureText(context, degree, 90),
           Text(
-            statusWeather.getText(widget.weather),
+            statusWeather.getText(weather),
             style: context.textTheme.titleLarge,
           ),
           const Gap(5),
@@ -64,6 +56,9 @@ class _NowState extends State<Now> {
   }
 
   Widget _buildCompactElementLayout(BuildContext context) {
+    final statusWeather = StatusWeather();
+    final statusData = StatusData();
+
     return Card(
       margin: const EdgeInsets.only(bottom: 15),
       child: Padding(
@@ -83,100 +78,98 @@ class _NowState extends State<Now> {
                   _buildDateText(context),
                   const Gap(5),
                   Text(
-                    statusWeather.getText(widget.weather),
+                    statusWeather.getText(weather),
                     style: context.textTheme.titleLarge?.copyWith(fontSize: 20),
                   ),
-                  _buildFeelsLikeText(context),
+                  _buildFeelsLikeText(context, statusData),
                   const Gap(30),
-                  _buildTemperatureCompactText(context, widget.degree),
+                  _buildTemperatureCompactText(context, statusData),
                   const Gap(5),
-                  _buildMinMaxTemperatureText(context),
+                  _buildMinMaxTemperatureText(context, statusData),
                 ],
               ),
             ),
-            _buildWeatherImage(140),
+            _buildWeatherImage(statusWeather, 140),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildWeatherImage(double height) {
-    return Image(
-      image: AssetImage(
-        statusWeather.getImageNow(
-          widget.weather,
-          widget.time,
-          widget.timeDay,
-          widget.timeNight,
+  Widget _buildWeatherImage(StatusWeather statusWeather, double height) =>
+      Image(
+        image: AssetImage(
+          statusWeather.getImageNow(weather, time, timeDay, timeNight),
         ),
-      ),
-      fit: BoxFit.fill,
-      height: height,
-    );
-  }
+        fit: BoxFit.fill,
+        height: height,
+      );
 
   Widget _buildTemperatureText(
     BuildContext context,
     double degree,
     double? fontSize,
-  ) {
-    return Text(
-      '${roundDegree ? degree.round() : degree}',
-      style: context.textTheme.displayLarge?.copyWith(
-        fontSize: fontSize,
-        fontWeight: FontWeight.w800,
-        shadows: const [Shadow(blurRadius: 15, offset: Offset(5, 5))],
-      ),
-    );
-  }
+  ) => Text(
+    '${roundDegree ? degree.round() : degree}',
+    style: context.textTheme.displayLarge?.copyWith(
+      fontSize: fontSize,
+      fontWeight: FontWeight.w800,
+      shadows: const [Shadow(blurRadius: 15, offset: Offset(5, 5))],
+    ),
+  );
 
-  Widget _buildTemperatureCompactText(BuildContext context, double degree) {
-    return Text(
-      statusData.getDegree(roundDegree ? widget.degree.round() : widget.degree),
-      style: context.textTheme.displayMedium?.copyWith(
-        fontWeight: FontWeight.w800,
-      ),
-    );
-  }
+  Widget _buildTemperatureCompactText(
+    BuildContext context,
+    StatusData statusData,
+  ) => Text(
+    statusData.getDegree(roundDegree ? degree.round() : degree),
+    style: context.textTheme.displayMedium?.copyWith(
+      fontWeight: FontWeight.w800,
+    ),
+  );
 
   Widget _buildDateText(BuildContext context) {
+    final parsedTime = DateTime.tryParse(time);
+    if (parsedTime == null) {
+      return const SizedBox.shrink();
+    }
+
     return Text(
-      DateFormat.MMMMEEEEd(
-        locale.languageCode,
-      ).format(DateTime.parse(widget.time)),
-      style: context.textTheme.labelLarge?.copyWith(color: Colors.grey),
+      DateFormat.MMMMEEEEd(locale.languageCode).format(parsedTime),
+      style: context.textTheme.labelLarge?.copyWith(
+        color: context.theme.colorScheme.onSurfaceVariant,
+      ),
     );
   }
 
-  Widget _buildFeelsLikeText(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('feels'.tr, style: context.textTheme.bodyMedium),
-        Text(' • ', style: context.textTheme.bodyMedium),
-        Text(
-          statusData.getDegree(widget.feels.round()),
-          style: context.textTheme.bodyMedium,
-        ),
-      ],
-    );
-  }
+  Widget _buildFeelsLikeText(BuildContext context, StatusData statusData) =>
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('feels'.tr, style: context.textTheme.bodyMedium),
+          Text(' • ', style: context.textTheme.bodyMedium),
+          Text(
+            statusData.getDegree(feels.round()),
+            style: context.textTheme.bodyMedium,
+          ),
+        ],
+      );
 
-  Widget _buildMinMaxTemperatureText(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          statusData.getDegree((widget.tempMax.round())),
-          style: context.textTheme.labelLarge,
-        ),
-        Text(' / ', style: context.textTheme.labelLarge),
-        Text(
-          statusData.getDegree((widget.tempMin.round())),
-          style: context.textTheme.labelLarge,
-        ),
-      ],
-    );
-  }
+  Widget _buildMinMaxTemperatureText(
+    BuildContext context,
+    StatusData statusData,
+  ) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        statusData.getDegree(tempMax.round()),
+        style: context.textTheme.labelLarge,
+      ),
+      Text(' / ', style: context.textTheme.labelLarge),
+      Text(
+        statusData.getDegree(tempMin.round()),
+        style: context.textTheme.labelLarge,
+      ),
+    ],
+  );
 }

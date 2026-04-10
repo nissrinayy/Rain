@@ -13,6 +13,6 @@
     <li>🕰️ <strong>12-Hour or 24-Hour Time Formats:</strong> Adjust the time display to your liking.</li>
     <li>🔔 <strong>Notifications:</strong> Receive weather alerts and stay informed.</li>
     <li>🧩 <strong>Widget:</strong> Add a weather widget to your home screen for quick updates.</li>
-    <li>🎨 <strong>Beautiful Design:</strong></li>
+    <li>🎨 <strong>Beautiful Design</strong></li>
 </ul>
 <p>Our application not only offers functionality but also boasts an aesthetically pleasing design. We have meticulously crafted Rain with your user experience as our top priority, guaranteeing both convenience and elegance in a single package.</p>

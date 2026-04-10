@@ -13,6 +13,6 @@
     <li>🕰️ <strong>12-Stunden- oder 24-Stunden-Format:</strong> Stellen Sie die Zeitanzeige nach Ihren Wünschen ein.</li>
     <li>🔔 <strong>Benachrichtigungen:</strong> Erhalten Sie Wetterwarnungen und bleiben Sie informiert.</li>
     <li>🧩 <strong>Widget:</strong> Fügen Sie Ihrem Startbildschirm ein Wetter-Widget für schnelle Updates hinzu.</li>
-    <li>🎨 <strong>Schönes Design:</strong></li>
+    <li>🎨 <strong>Schönes Design</strong></li>
 </ul>
 <p>Unsere Anwendung bietet nicht nur Funktionalität, sondern auch ein ästhetisch ansprechendes Design. Wir haben Rain mit Ihrer Benutzererfahrung als oberste Priorität sorgfältig gestaltet und garantieren sowohl Komfort als auch Eleganz in einem Paket.</p>

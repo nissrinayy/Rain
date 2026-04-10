@@ -21,11 +21,11 @@ class NotificationShow {
       final scheduledTime = _getScheduledTime(date);
 
       await flutterLocalNotificationsPlugin.zonedSchedule(
-        id,
-        title,
-        body,
-        scheduledTime,
-        notificationDetails,
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: scheduledTime,
+        notificationDetails: notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         payload: imagePath,
       );
@@ -36,9 +36,8 @@ class NotificationShow {
     }
   }
 
-  Future<String> _getLocalImagePath(String icon) async {
-    return await WeatherController().getLocalImagePath(icon);
-  }
+  Future<String> _getLocalImagePath(String icon) async =>
+      await WeatherController().getLocalImagePath(icon);
 
   Future<NotificationDetails> _buildNotificationDetails(
     String imagePath,
@@ -55,7 +54,6 @@ class NotificationShow {
     return NotificationDetails(android: androidNotificationDetails);
   }
 
-  tz.TZDateTime _getScheduledTime(DateTime date) {
-    return tz.TZDateTime.from(date, tz.local);
-  }
+  tz.TZDateTime _getScheduledTime(DateTime date) =>
+      tz.TZDateTime.from(date, tz.local);
 }

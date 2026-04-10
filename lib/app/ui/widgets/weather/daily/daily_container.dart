@@ -6,6 +6,7 @@ import 'package:rain/app/data/db.dart';
 import 'package:rain/app/ui/widgets/weather/daily/daily_card_info.dart';
 import 'package:rain/app/ui/widgets/weather/status/status_data.dart';
 import 'package:rain/app/ui/widgets/weather/status/status_weather.dart';
+import 'package:rain/app/utils/navigation_helper.dart';
 import 'package:rain/main.dart';
 
 class DailyContainer extends StatefulWidget {
@@ -63,22 +64,18 @@ class _DailyContainerState extends State<DailyContainer> {
     WeatherCard weatherData,
     List<int?> weatherCodeDaily,
     TextStyle? labelLarge,
-  ) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: 7,
-      itemBuilder: (ctx, index) {
-        return _buildDailyItem(
-          context,
-          weatherData,
-          weatherCodeDaily,
-          index,
-          labelLarge,
-        );
-      },
-    );
-  }
+  ) => ListView.builder(
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    itemCount: 7,
+    itemBuilder: (ctx, index) => _buildDailyItem(
+      context,
+      weatherData,
+      weatherCodeDaily,
+      index,
+      labelLarge,
+    ),
+  );
 
   Widget _buildDailyItem(
     BuildContext context,
@@ -86,48 +83,38 @@ class _DailyContainerState extends State<DailyContainer> {
     List<int?> weatherCodeDaily,
     int index,
     TextStyle? labelLarge,
-  ) {
-    final splashColor = context.theme.colorScheme.primary.withValues(
-      alpha: 0.4,
-    );
-    const inkWellBorderRadius = BorderRadius.all(Radius.circular(16));
-
-    return InkWell(
-      splashColor: splashColor,
-      borderRadius: inkWellBorderRadius,
-      onTap: () => Get.to(
-        () => DailyCardInfo(weatherData: weatherData, index: index),
-        transition: Transition.downToUp,
+  ) => InkWell(
+    splashColor: context.theme.colorScheme.primary.withValues(alpha: 0.4),
+    borderRadius: BorderRadius.all(Radius.circular(16)),
+    onTap: () => NavigationHelper.toDownToUp(
+      () => DailyCardInfo(weatherData: weatherData, index: index),
+    ),
+    child: Container(
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _buildDayText(weatherData, index, labelLarge),
+          _buildWeatherInfo(weatherCodeDaily, index, labelLarge),
+          _buildTemperatureRange(weatherData, index, labelLarge),
+        ],
       ),
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildDayText(weatherData, index, labelLarge),
-            _buildWeatherInfo(weatherCodeDaily, index, labelLarge),
-            _buildTemperatureRange(weatherData, index, labelLarge),
-          ],
-        ),
-      ),
-    );
-  }
+    ),
+  );
 
   Widget _buildDayText(
     WeatherCard weatherData,
     int index,
     TextStyle? labelLarge,
-  ) {
-    return Expanded(
-      child: Text(
-        DateFormat.EEEE(
-          locale.languageCode,
-        ).format((weatherData.timeDaily ?? [])[index]),
-        style: labelLarge,
-        overflow: TextOverflow.ellipsis,
-      ),
-    );
-  }
+  ) => Expanded(
+    child: Text(
+      DateFormat.EEEE(
+        locale.languageCode,
+      ).format((weatherData.timeDaily ?? [])[index]),
+      style: labelLarge,
+      overflow: TextOverflow.ellipsis,
+    ),
+  );
 
   Widget _buildWeatherInfo(
     List<int?> weatherCodeDaily,
@@ -161,46 +148,42 @@ class _DailyContainerState extends State<DailyContainer> {
     WeatherCard weatherData,
     int index,
     TextStyle? labelLarge,
-  ) {
-    return Expanded(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text(
-            statusData.getDegree(
-              (weatherData.temperature2MMax ?? [])[index]?.round(),
-            ),
-            style: labelLarge,
+  ) => Expanded(
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(
+          statusData.getDegree(
+            (weatherData.temperature2MMax ?? [])[index]?.round(),
           ),
-          Text(' / ', style: labelLarge),
-          Text(
-            statusData.getDegree(
-              (weatherData.temperature2MMin ?? [])[index]?.round(),
-            ),
-            style: labelLarge,
+          style: labelLarge,
+        ),
+        Text(' / ', style: labelLarge),
+        Text(
+          statusData.getDegree(
+            (weatherData.temperature2MMin ?? [])[index]?.round(),
           ),
-        ],
-      ),
-    );
-  }
+          style: labelLarge,
+        ),
+      ],
+    ),
+  );
 
   Widget _buildMoreInfoButton(
     BuildContext context,
     Color splashColor,
     BorderRadius inkWellBorderRadius,
-  ) {
-    return InkWell(
-      splashColor: splashColor,
-      borderRadius: inkWellBorderRadius,
-      onTap: widget.onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Text(
-          'weatherMore'.tr,
-          style: context.textTheme.titleMedium,
-          overflow: TextOverflow.ellipsis,
-        ),
+  ) => InkWell(
+    splashColor: splashColor,
+    borderRadius: inkWellBorderRadius,
+    onTap: widget.onTap,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Text(
+        'weatherMore'.tr,
+        style: context.textTheme.titleMedium,
+        overflow: TextOverflow.ellipsis,
       ),
-    );
-  }
+    ),
+  );
 }

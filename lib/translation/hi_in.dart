@@ -11,6 +11,14 @@ class HiIn {
     'description3':
         'यदि आपको कोई समस्या आती है, तो कृपया हमसे ईमेल या एप्लिकेशन समीक्षा के माध्यम से संपर्क करें।',
     'next': 'आगे',
+    'skip': 'छोड़ें',
+    'editCityHint': 'शहर की जानकारी संपादित करें',
+    'createCityHint': 'शहर डेटा खोजें या मैन्युअल रूप से दर्ज करें',
+    'unsavedChanges': 'सहेजे नहीं गए बदलाव',
+    'discardChanges': 'क्या आप वाकई अपने बदलावों को छोड़ना चाहते हैं?',
+    'discard': 'छोड़ें',
+    'save': 'सहेजें',
+    'ready': 'तैयार',
     'search': 'खोजें...',
     'loading': 'लोड हो रहा है...',
     'searchCity': 'अपना शहर खोजें',
@@ -126,6 +134,7 @@ class HiIn {
     'searchMethod': 'खोज या स्थानगति का उपयोग करें',
     'done': 'किया',
     'groups': 'हमारे समूह',
+    'aboutApp': 'ऐप के बारे में',
     'openMeteo': 'Open-Meteo से डेटा (CC-BY 4.0)',
     'hourlyVariables': 'घंटेवार मौसम चर',
     'dailyVariables': 'दैनिक मौसम चर',
@@ -138,5 +147,9 @@ class HiIn {
     'hideMap': 'मानचित्र छिपाएँ',
     'edit': 'संपादित करें',
     'no_desc_data': 'कोई डेटा नहीं',
+    'discord': 'डिस्कॉर्ड',
+    'telegram': 'टेलीग्राम',
+    'error_occurred': 'एक त्रुटि हुई',
+    'location_not_found': 'आपका स्थान निर्धारित नहीं किया जा सका',
   };
 }

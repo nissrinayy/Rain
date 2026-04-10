@@ -4,10 +4,13 @@ import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:rain/app/api/api.dart';
 import 'package:rain/app/api/city_api.dart';
+import 'package:rain/app/constants/app_constants.dart';
 import 'package:rain/app/controller/controller.dart';
 import 'package:rain/app/data/db.dart';
-import 'package:rain/app/ui/widgets/button.dart';
+import 'package:rain/app/ui/widgets/confirmation_dialog.dart';
 import 'package:rain/app/ui/widgets/text_form.dart';
+import 'package:rain/app/utils/navigation_helper.dart';
+import 'package:rain/app/utils/responsive_utils.dart';
 import 'package:rain/main.dart';
 
 class PlaceAction extends StatefulWidget {
@@ -29,131 +32,357 @@ class PlaceAction extends StatefulWidget {
 }
 
 class _PlaceActionState extends State<PlaceAction>
-    with SingleTickerProviderStateMixin {
-  bool isLoading = false;
-  final formKey = GlobalKey<FormState>();
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  final _formKey = GlobalKey<FormState>();
   final _focusNode = FocusNode();
-  final weatherController = Get.put(WeatherController());
+  final weatherController = Get.find<WeatherController>();
+  bool _isSaving = false;
 
-  static const kTextFieldElevation = 4.0;
+  static const kTextFieldElevation = 0.0;
 
-  late TextEditingController _controller;
-  late TextEditingController _controllerLat;
-  late TextEditingController _controllerLon;
-  late TextEditingController _controllerCity;
-  late TextEditingController _controllerDistrict;
+  late final TextEditingController _searchController;
+  late final TextEditingController _latController;
+  late final TextEditingController _lonController;
+  late final TextEditingController _cityController;
+  late final TextEditingController _districtController;
 
-  late AnimationController _animationController;
-  late Animation<double> _animation;
+  late final AnimationController _animationController;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<Offset> _slideAnimation;
 
-  late final _EditingController controller;
+  late final _EditingController _editingController;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController();
-    _controllerLat = TextEditingController(text: widget.latitude);
-    _controllerLon = TextEditingController(text: widget.longitude);
-    _controllerCity = TextEditingController();
-    _controllerDistrict = TextEditingController();
+    WidgetsBinding.instance.addObserver(this);
+    _initializeControllers();
+    _initializeEditMode();
+    _initAnimations();
+    _setupEditingController();
+  }
 
-    if (widget.edit) {
-      _initializeEditMode();
-    }
-
-    controller = _EditingController(
-      _controllerLat.text,
-      _controllerLon.text,
-      _controllerCity.text,
-      _controllerDistrict.text,
-    );
-
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _animation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    );
+  void _initializeControllers() {
+    _searchController = TextEditingController();
+    _latController = TextEditingController(text: widget.latitude);
+    _lonController = TextEditingController(text: widget.longitude);
+    _cityController = TextEditingController();
+    _districtController = TextEditingController();
   }
 
   void _initializeEditMode() {
-    _controllerLat.text = widget.card!.lat.toString();
-    _controllerLon.text = widget.card!.lon.toString();
-    _controllerCity.text = widget.card!.city!;
-    _controllerDistrict.text = widget.card!.district!;
+    if (widget.edit && widget.card != null) {
+      _latController.text = '${widget.card!.lat}';
+      _lonController.text = '${widget.card!.lon}';
+      _cityController.text = widget.card!.city!;
+      _districtController.text = widget.card!.district!;
+    }
+  }
+
+  void _initAnimations() {
+    _animationController = AnimationController(
+      vsync: this,
+      duration: AppConstants.shortAnimation,
+    );
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
+    _animationController.forward();
+  }
+
+  void _setupEditingController() {
+    _editingController = _EditingController(
+      _latController.text,
+      _lonController.text,
+      _cityController.text,
+      _districtController.text,
+    );
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _searchController.dispose();
+    _latController.dispose();
+    _lonController.dispose();
+    _cityController.dispose();
+    _districtController.dispose();
+    _focusNode.dispose();
+    _editingController.dispose();
     _animationController.dispose();
-    _controller.dispose();
-    _controllerLat.dispose();
-    _controllerLon.dispose();
-    _controllerCity.dispose();
-    _controllerDistrict.dispose();
-    controller.dispose();
     super.dispose();
   }
 
-  void textTrim(TextEditingController value) {
-    value.text = value.text.trim();
-    while (value.text.contains('  ')) {
-      value.text = value.text.replaceAll('  ', ' ');
+  Future<void> _onPopInvokedWithResult(bool didPop, dynamic result) async {
+    if (didPop) return;
+
+    if (!_editingController.canCompose.value) {
+      NavigationHelper.back();
+      return;
+    }
+
+    final shouldPop = await showConfirmationDialog(
+      context: context,
+      title: 'unsavedChanges'.tr,
+      message: 'discardChanges'.tr,
+      icon: IconsaxPlusBold.warning_2,
+      confirmText: 'discard'.tr,
+      isDestructive: true,
+    );
+
+    if (shouldPop == true && mounted) {
+      NavigationHelper.back();
     }
   }
 
+  Future<void> _onSavePressed() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    _latController.text = _latController.text.trim();
+    _lonController.text = _lonController.text.trim();
+    _cityController.text = _cityController.text.trim();
+    _districtController.text = _districtController.text.trim();
+
+    setState(() => _isSaving = true);
+    await _handleSubmit();
+    if (mounted) setState(() => _isSaving = false);
+  }
+
   void fillController(Result selection) {
-    _controllerLat.text = '${selection.latitude}';
-    _controllerLon.text = '${selection.longitude}';
-    _controllerCity.text = selection.name;
-    _controllerDistrict.text = selection.admin1;
-    _controller.clear();
+    _latController.text = '${selection.latitude}';
+    _lonController.text = '${selection.longitude}';
+    _cityController.text = selection.name;
+    _districtController.text = selection.admin1;
+    _searchController.clear();
     _focusNode.unfocus();
 
-    controller.lat.value = _controllerLat.text;
-    controller.lon.value = _controllerLon.text;
-    controller.city.value = _controllerCity.text;
-    controller.district.value = _controllerDistrict.text;
+    _editingController.lat.value = _latController.text;
+    _editingController.lon.value = _lonController.text;
+    _editingController.city.value = _cityController.text;
+    _editingController.district.value = _districtController.text;
 
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    if (controller.canCompose.value) {
-      _animationController.forward();
-    } else {
-      _animationController.reverse();
-    }
+    final padding = ResponsiveUtils.getResponsivePadding(context);
+    final isMobile = ResponsiveUtils.isMobile(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-      child: Form(
-        key: formKey,
-        child: SingleChildScrollView(
-          child: Stack(
-            children: [
-              Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildTitleText(),
-                    _buildSearchField(),
-                    _buildLatitudeField(),
-                    _buildLongitudeField(),
-                    _buildCityField(),
-                    _buildDistrictField(),
-                    _buildSubmitButton(),
-                  ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: _onPopInvokedWithResult,
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: isMobile ? double.infinity : AppConstants.maxModalWidth,
+          maxHeight:
+              MediaQuery.of(context).size.height * (isMobile ? 0.95 : 0.90),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildDragHandle(colorScheme, isMobile),
+            _buildHeader(colorScheme, padding),
+            Divider(
+              height: 1,
+              thickness: 1,
+              color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+            ),
+            Flexible(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: _buildForm(context, padding),
                 ),
               ),
-              if (isLoading) const Center(child: CircularProgressIndicator()),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDragHandle(ColorScheme colorScheme, bool isMobile) {
+    if (!isMobile) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.only(
+        top: AppConstants.spacingM,
+        bottom: AppConstants.spacingS,
+      ),
+      width: 32,
+      height: 4,
+      decoration: BoxDecoration(
+        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
+  }
+
+  Widget _buildHeader(ColorScheme colorScheme, double padding) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: padding * 1.5,
+        vertical: padding,
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppConstants.spacingS + 2),
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(
+                AppConstants.borderRadiusMedium,
+              ),
+            ),
+            child: Icon(
+              widget.edit ? IconsaxPlusBold.edit : IconsaxPlusBold.location_add,
+              size: AppConstants.iconSizeLarge,
+              color: colorScheme.onPrimaryContainer,
+            ),
+          ),
+          SizedBox(width: padding * 1.2),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.edit ? 'edit'.tr : 'create'.tr,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(
+                      context,
+                      20,
+                    ),
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                SizedBox(height: AppConstants.spacingXS),
+                Text(
+                  widget.edit ? 'editCityHint'.tr : 'createCityHint'.tr,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(
+                      context,
+                      12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: padding * 0.8),
+          _buildSaveButton(colorScheme),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSaveButton(ColorScheme colorScheme) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: _editingController.canCompose,
+      builder: (context, canCompose, _) {
+        return AnimatedScale(
+          scale: canCompose || _isSaving ? 1.0 : 0.92,
+          duration: AppConstants.longAnimation,
+          curve: Curves.easeOutCubic,
+          child: Material(
+            color: canCompose || _isSaving
+                ? colorScheme.primary
+                : colorScheme.surfaceContainerHigh,
+            elevation: canCompose || _isSaving ? AppConstants.elevationLow : 0,
+            shadowColor: colorScheme.primary.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(
+              AppConstants.borderRadiusXLarge,
+            ),
+            child: InkWell(
+              onTap: (canCompose && !_isSaving) ? _onSavePressed : null,
+              borderRadius: BorderRadius.circular(
+                AppConstants.borderRadiusXLarge,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: AppConstants.spacingS,
+                ),
+                child: _isSaving
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            colorScheme.onPrimary,
+                          ),
+                        ),
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            IconsaxPlusBold.tick_circle,
+                            size: AppConstants.iconSizeSmall,
+                            color: canCompose
+                                ? colorScheme.onPrimary
+                                : colorScheme.onSurfaceVariant,
+                          ),
+                          SizedBox(width: AppConstants.spacingXS + 2),
+                          Text(
+                            widget.edit ? 'save'.tr : 'done'.tr,
+                            style: TextStyle(
+                              fontSize: ResponsiveUtils.getResponsiveFontSize(
+                                context,
+                                13,
+                              ),
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.2,
+                              color: canCompose
+                                  ? colorScheme.onPrimary
+                                  : colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildForm(BuildContext context, double padding) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(padding * 1.5),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildSearchSection(context, padding),
+              SizedBox(height: padding * 1.5),
+              _buildLocationSection(context, padding),
+              SizedBox(height: padding * 1.5),
+              _buildInfoSection(context, padding),
+              SizedBox(height: padding * 2),
             ],
           ),
         ),
@@ -161,58 +390,56 @@ class _PlaceActionState extends State<PlaceAction>
     );
   }
 
-  Widget _buildTitleText() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 14, bottom: 7),
-      child: Text(
-        widget.edit ? 'edit'.tr : 'create'.tr,
-        style: context.textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.bold,
+  Widget _buildSearchSection(BuildContext context, double padding) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(
+          context,
+          'search'.tr,
+          IconsaxPlusBold.global_search,
         ),
-        textAlign: TextAlign.center,
-      ),
+        SizedBox(height: padding),
+        RawAutocomplete<Result>(
+          focusNode: _focusNode,
+          textEditingController: _searchController,
+          fieldViewBuilder: _buildSearchField,
+          optionsBuilder: _buildCityOptions,
+          onSelected: fillController,
+          displayStringForOption: (Result option) =>
+              '${option.name}, ${option.admin1}',
+          optionsViewBuilder: _buildOptionsView,
+        ),
+      ],
     );
   }
 
-  Widget _buildSearchField() {
-    return RawAutocomplete<Result>(
+  Widget _buildSearchField(
+    BuildContext context,
+    TextEditingController fieldTextEditingController,
+    FocusNode fieldFocusNode,
+    VoidCallback onFieldSubmitted,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return MyTextForm(
+      elevation: kTextFieldElevation,
+      labelText: 'searchCity'.tr,
+      type: TextInputType.text,
+      icon: Icon(IconsaxPlusLinear.global_search, color: colorScheme.primary),
+      controller: _searchController,
       focusNode: _focusNode,
-      textEditingController: _controller,
-      fieldViewBuilder:
-          (
-            BuildContext context,
-            TextEditingController fieldTextEditingController,
-            FocusNode fieldFocusNode,
-            VoidCallback onFieldSubmitted,
-          ) {
-            return MyTextForm(
-              elevation: kTextFieldElevation,
-              labelText: 'search'.tr,
-              type: TextInputType.text,
-              icon: const Icon(IconsaxPlusLinear.global_search),
-              controller: _controller,
-              margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
-              focusNode: _focusNode,
-            );
-          },
-      optionsBuilder: (TextEditingValue textEditingValue) {
-        if (textEditingValue.text.isEmpty) {
-          return const Iterable<Result>.empty();
-        }
-        return WeatherAPI().getCity(textEditingValue.text, locale);
-      },
-      onSelected: (Result selection) => fillController(selection),
-      displayStringForOption: (Result option) =>
-          '${option.name}, ${option.admin1}',
-      optionsViewBuilder:
-          (
-            BuildContext context,
-            AutocompleteOnSelected<Result> onSelected,
-            Iterable<Result> options,
-          ) {
-            return _buildOptionsView(context, onSelected, options);
-          },
+      margin: EdgeInsets.zero,
     );
+  }
+
+  Future<Iterable<Result>> _buildCityOptions(
+    TextEditingValue textEditingValue,
+  ) {
+    if (textEditingValue.text.isEmpty) {
+      return Future.value(const Iterable<Result>.empty());
+    }
+    return WeatherAPI().getCity(textEditingValue.text, locale);
   }
 
   Widget _buildOptionsView(
@@ -220,110 +447,149 @@ class _PlaceActionState extends State<PlaceAction>
     AutocompleteOnSelected<Result> onSelected,
     Iterable<Result> options,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.only(top: AppConstants.spacingXS),
       child: Align(
         alignment: Alignment.topCenter,
         child: Material(
-          borderRadius: BorderRadius.circular(20),
-          elevation: 4.0,
-          child: ListView.builder(
-            padding: EdgeInsets.zero,
-            shrinkWrap: true,
-            itemCount: options.length,
-            itemBuilder: (BuildContext context, int index) {
-              final Result option = options.elementAt(index);
-              return InkWell(
-                onTap: () => onSelected(option),
-                child: ListTile(
-                  title: Text(
-                    '${option.name}, ${option.admin1}',
-                    style: context.textTheme.labelLarge,
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+          elevation: AppConstants.elevationHigh,
+          shadowColor: colorScheme.shadow.withValues(alpha: 0.2),
+          color: colorScheme.surfaceContainerHigh,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 250),
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(
+                vertical: AppConstants.spacingXS,
+              ),
+              shrinkWrap: true,
+              itemCount: options.length,
+              itemBuilder: (BuildContext context, int index) {
+                final Result option = options.elementAt(index);
+                return InkWell(
+                  onTap: () => onSelected(option),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppConstants.spacingL,
+                      vertical: AppConstants.spacingM,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          IconsaxPlusLinear.location,
+                          color: colorScheme.primary,
+                          size: AppConstants.iconSizeSmall,
+                        ),
+                        SizedBox(width: AppConstants.spacingM),
+                        Expanded(
+                          child: Text(
+                            '${option.name}, ${option.admin1}',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildLatitudeField() {
-    return MyTextForm(
-      elevation: kTextFieldElevation,
-      controller: _controllerLat,
-      labelText: 'lat'.tr,
-      type: TextInputType.number,
-      icon: const Icon(IconsaxPlusLinear.location),
-      onChanged: (value) {
-        controller.lat.value = value;
-        setState(() {});
-      },
-      margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
-      validator: (value) => _validateLatitude(value),
-    );
-  }
+  Widget _buildLocationSection(BuildContext context, double padding) {
+    final colorScheme = Theme.of(context).colorScheme;
 
-  Widget _buildLongitudeField() {
-    return MyTextForm(
-      elevation: kTextFieldElevation,
-      controller: _controllerLon,
-      labelText: 'lon'.tr,
-      type: TextInputType.number,
-      icon: const Icon(IconsaxPlusLinear.location),
-      onChanged: (value) {
-        controller.lon.value = value;
-        setState(() {});
-      },
-      margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
-      validator: (value) => _validateLongitude(value),
-    );
-  }
-
-  Widget _buildCityField() {
-    return MyTextForm(
-      elevation: kTextFieldElevation,
-      controller: _controllerCity,
-      labelText: 'city'.tr,
-      type: TextInputType.name,
-      icon: const Icon(IconsaxPlusLinear.building_3),
-      onChanged: (value) {
-        controller.city.value = value;
-        setState(() {});
-      },
-      margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
-      validator: (value) => _validateCity(value),
-    );
-  }
-
-  Widget _buildDistrictField() {
-    return MyTextForm(
-      elevation: kTextFieldElevation,
-      controller: _controllerDistrict,
-      labelText: 'district'.tr,
-      type: TextInputType.streetAddress,
-      icon: const Icon(IconsaxPlusLinear.global),
-      onChanged: (value) {
-        controller.district.value = value;
-        setState(() {});
-      },
-      margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
-      validator: (value) => _validateDistrict(value),
-    );
-  }
-
-  Widget _buildSubmitButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      child: SizeTransition(
-        sizeFactor: _animation,
-        axisAlignment: -1.0,
-        child: MyTextButton(
-          buttonName: 'done'.tr,
-          onPressed: controller.canCompose.value ? _handleSubmit : null,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(context, 'location'.tr, IconsaxPlusBold.location),
+        SizedBox(height: padding),
+        MyTextForm(
+          elevation: kTextFieldElevation,
+          controller: _latController,
+          labelText: 'lat'.tr,
+          type: TextInputType.number,
+          icon: Icon(IconsaxPlusLinear.location, color: colorScheme.primary),
+          onChanged: (value) => _editingController.lat.value = value,
+          validator: _validateLatitude,
+          margin: EdgeInsets.zero,
         ),
-      ),
+        SizedBox(height: padding),
+        MyTextForm(
+          elevation: kTextFieldElevation,
+          controller: _lonController,
+          labelText: 'lon'.tr,
+          type: TextInputType.number,
+          icon: Icon(IconsaxPlusLinear.location, color: colorScheme.primary),
+          onChanged: (value) => _editingController.lon.value = value,
+          validator: _validateLongitude,
+          margin: EdgeInsets.zero,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoSection(BuildContext context, double padding) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        MyTextForm(
+          elevation: kTextFieldElevation,
+          controller: _cityController,
+          labelText: 'city'.tr,
+          type: TextInputType.name,
+          icon: Icon(IconsaxPlusLinear.building_3, color: colorScheme.primary),
+          onChanged: (value) => _editingController.city.value = value,
+          validator: _validateCity,
+          margin: EdgeInsets.zero,
+        ),
+        SizedBox(height: padding),
+        MyTextForm(
+          elevation: kTextFieldElevation,
+          controller: _districtController,
+          labelText: 'district'.tr,
+          type: TextInputType.streetAddress,
+          icon: Icon(IconsaxPlusLinear.global, color: colorScheme.primary),
+          onChanged: (value) => _editingController.district.value = value,
+          validator: _validateDistrict,
+          margin: EdgeInsets.zero,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title,
+    IconData icon,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: AppConstants.iconSizeSmall + 2,
+          color: colorScheme.primary,
+        ),
+        SizedBox(width: AppConstants.spacingS),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
+          ),
+        ),
+      ],
     );
   }
 
@@ -331,7 +597,7 @@ class _PlaceActionState extends State<PlaceAction>
     if (value == null || value.isEmpty) {
       return 'validateValue'.tr;
     }
-    double? numericValue = double.tryParse(value);
+    final numericValue = double.tryParse(value);
     if (numericValue == null) {
       return 'validateNumber'.tr;
     }
@@ -345,7 +611,7 @@ class _PlaceActionState extends State<PlaceAction>
     if (value == null || value.isEmpty) {
       return 'validateValue'.tr;
     }
-    double? numericValue = double.tryParse(value);
+    final numericValue = double.tryParse(value);
     if (numericValue == null) {
       return 'validateNumber'.tr;
     }
@@ -370,46 +636,48 @@ class _PlaceActionState extends State<PlaceAction>
   }
 
   Future<void> _handleSubmit() async {
-    if (formKey.currentState!.validate()) {
-      textTrim(_controllerLat);
-      textTrim(_controllerLon);
-      textTrim(_controllerCity);
-      textTrim(_controllerDistrict);
-
-      setState(() => isLoading = true);
-      if (widget.edit) {
-        await weatherController.updateCardLocation(
-          widget.card!,
-          double.parse(_controllerLat.text),
-          double.parse(_controllerLon.text),
-          _controllerCity.text,
-          _controllerDistrict.text,
-        );
-      } else {
-        await weatherController.addCardWeather(
-          double.parse(_controllerLat.text),
-          double.parse(_controllerLon.text),
-          _controllerCity.text,
-          _controllerDistrict.text,
-        );
+    if (_formKey.currentState!.validate()) {
+      try {
+        if (widget.edit) {
+          await weatherController.updateCardLocation(
+            widget.card!,
+            double.parse(_latController.text),
+            double.parse(_lonController.text),
+            _cityController.text,
+            _districtController.text,
+          );
+        } else {
+          await weatherController.addCardWeather(
+            double.parse(_latController.text),
+            double.parse(_lonController.text),
+            _cityController.text,
+            _districtController.text,
+          );
+        }
+        if (mounted) NavigationHelper.back();
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('error'.tr)));
+        }
+        rethrow;
       }
-      setState(() => isLoading = false);
-      Get.back();
     }
   }
 }
 
 class _EditingController extends ChangeNotifier {
   _EditingController(
-    this.initialLat,
-    this.initialLon,
-    this.initialCity,
-    this.initialDistrict,
+    this._initialLat,
+    this._initialLon,
+    this._initialCity,
+    this._initialDistrict,
   ) {
-    lat.value = initialLat;
-    lon.value = initialLon;
-    city.value = initialCity;
-    district.value = initialDistrict;
+    lat.value = _initialLat;
+    lon.value = _initialLon;
+    city.value = _initialCity;
+    district.value = _initialDistrict;
 
     lat.addListener(_updateCanCompose);
     lon.addListener(_updateCanCompose);
@@ -417,31 +685,31 @@ class _EditingController extends ChangeNotifier {
     district.addListener(_updateCanCompose);
   }
 
-  final String? initialLat;
-  final String? initialLon;
-  final String? initialCity;
-  final String? initialDistrict;
+  final String _initialLat;
+  final String _initialLon;
+  final String _initialCity;
+  final String _initialDistrict;
 
-  final lat = ValueNotifier<String?>(null);
-  final lon = ValueNotifier<String?>(null);
-  final city = ValueNotifier<String?>(null);
-  final district = ValueNotifier<String?>(null);
+  final ValueNotifier<String> lat = ValueNotifier<String>('');
+  final ValueNotifier<String> lon = ValueNotifier<String>('');
+  final ValueNotifier<String> city = ValueNotifier<String>('');
+  final ValueNotifier<String> district = ValueNotifier<String>('');
 
-  final _canCompose = ValueNotifier(false);
+  final _canCompose = ValueNotifier<bool>(false);
   ValueListenable<bool> get canCompose => _canCompose;
 
   void _updateCanCompose() {
     final hasChanges =
-        (lat.value != initialLat) ||
-        (lon.value != initialLon) ||
-        (city.value != initialCity) ||
-        (district.value != initialDistrict);
+        lat.value != _initialLat ||
+        lon.value != _initialLon ||
+        city.value != _initialCity ||
+        district.value != _initialDistrict;
 
     final isComplete =
-        (lat.value?.isNotEmpty ?? false) &&
-        (lon.value?.isNotEmpty ?? false) &&
-        (city.value?.isNotEmpty ?? false) &&
-        (district.value?.isNotEmpty ?? false);
+        lat.value.isNotEmpty &&
+        lon.value.isNotEmpty &&
+        city.value.isNotEmpty &&
+        district.value.isNotEmpty;
 
     _canCompose.value = hasChanges && isComplete;
   }
@@ -452,6 +720,10 @@ class _EditingController extends ChangeNotifier {
     lon.removeListener(_updateCanCompose);
     city.removeListener(_updateCanCompose);
     district.removeListener(_updateCanCompose);
+    lat.dispose();
+    lon.dispose();
+    city.dispose();
+    district.dispose();
     super.dispose();
   }
 }

@@ -4,6 +4,7 @@ import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:rain/app/data/db.dart';
 import 'package:rain/app/ui/widgets/weather/daily/daily_card_info.dart';
 import 'package:rain/app/ui/widgets/weather/daily/daily_card.dart';
+import 'package:rain/app/utils/navigation_helper.dart';
 
 class DailyCardList extends StatefulWidget {
   const DailyCardList({super.key, required this.weatherData});
@@ -31,25 +32,23 @@ class _DailyCardListState extends State<DailyCardList> {
     );
   }
 
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      automaticallyImplyLeading: false,
-      centerTitle: true,
-      leading: IconButton(
-        onPressed: () => Get.back(),
-        icon: const Icon(IconsaxPlusLinear.arrow_left_3, size: 20),
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
+  AppBar _buildAppBar(BuildContext context) => AppBar(
+    automaticallyImplyLeading: false,
+    centerTitle: true,
+    leading: IconButton(
+      onPressed: () => NavigationHelper.back(),
+      icon: const Icon(IconsaxPlusLinear.arrow_left_3, size: 20),
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+    ),
+    title: Text(
+      'weatherMore'.tr,
+      style: context.textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.w600,
+        fontSize: 18,
       ),
-      title: Text(
-        'weatherMore'.tr,
-        style: context.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-          fontSize: 18,
-        ),
-      ),
-    );
-  }
+    ),
+  );
 
   Widget _buildDailyCardItem(
     BuildContext context,
@@ -69,9 +68,8 @@ class _DailyCardListState extends State<DailyCardList> {
     }
 
     return GestureDetector(
-      onTap: () => Get.to(
+      onTap: () => NavigationHelper.toDownToUp(
         () => DailyCardInfo(weatherData: weatherData, index: index),
-        transition: Transition.downToUp,
       ),
       child: DailyCard(
         timeDaily: timeDaily,

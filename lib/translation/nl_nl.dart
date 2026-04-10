@@ -11,6 +11,14 @@ class NlNl {
     'description3':
         'Als u problemen ondervindt, neem dan contact met ons op via e-mail of in de recensies van de applicatie.',
     'next': 'Volgende',
+    'skip': 'Overslaan',
+    'editCityHint': 'Stadsinformatie bewerken',
+    'createCityHint': 'Zoek of voer stadsgegevens handmatig in',
+    'unsavedChanges': 'Niet-opgeslagen wijzigingen',
+    'discardChanges': 'Weet u zeker dat u uw wijzigingen wilt negeren?',
+    'discard': 'Negeren',
+    'save': 'Opslaan',
+    'ready': 'Klaar',
     'search': 'Zoeken...',
     'loading': 'Laden...',
     'searchCity': 'Vind jouw stad',
@@ -127,6 +135,7 @@ class NlNl {
     'searchMethod': 'Gebruik zoeken of geolocatie',
     'done': 'Klaar',
     'groups': 'Onze groepen',
+    'aboutApp': 'Over de app',
     'openMeteo': 'Gegevens van Open-Meteo (CC-BY 4.0)',
     'hourlyVariables': 'Uurlijkse weervariabelen',
     'dailyVariables': 'Dagelijkse weervariabelen',
@@ -139,5 +148,9 @@ class NlNl {
     'hideMap': 'Kaart verbergen',
     'edit': 'Bewerken',
     'no_desc_data': 'Ingen data',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Er is een fout opgetreden',
+    'location_not_found': 'Kan uw locatie niet bepalen',
   };
 }

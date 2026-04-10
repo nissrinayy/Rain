@@ -17,6 +17,7 @@ import 'package:rain/app/data/db.dart';
 import 'package:rain/app/ui/geolocation.dart';
 import 'package:rain/app/ui/home.dart';
 import 'package:rain/app/ui/onboarding.dart';
+import 'package:rain/app/utils/snackbar_overlay.dart';
 import 'package:rain/theme/theme.dart';
 import 'package:rain/theme/theme_controller.dart';
 import 'package:rain/translation/translation.dart';
@@ -51,26 +52,38 @@ const String androidWidgetName = 'OreoWidget';
 
 const List<Map<String, dynamic>> appLanguages = [
   {'name': 'বাংলা', 'locale': Locale('bn', 'IN')},
+  {'name': 'العربية', 'locale': Locale('ar', 'SA')},
+  {'name': 'অসমীয়া', 'locale': Locale('as', 'IN')},
   {'name': 'Čeština', 'locale': Locale('cs', 'CZ')},
   {'name': 'Dansk', 'locale': Locale('da', 'DK')},
   {'name': 'Deutsch', 'locale': Locale('de', 'DE')},
+  {'name': 'Ελληνικά', 'locale': Locale('el', 'GR')},
   {'name': 'English', 'locale': Locale('en', 'US')},
   {'name': 'Español', 'locale': Locale('es', 'ES')},
   {'name': 'Français', 'locale': Locale('fr', 'FR')},
-  // {'name': 'Gaeilge', 'locale':  Locale('ga', 'IE')},
+  {'name': 'Gaeilge', 'locale': Locale('ga', 'IE')},
+  {'name': 'ગુજરાતી', 'locale': Locale('gu', 'IN')},
   {'name': 'हिन्दी', 'locale': Locale('hi', 'IN')},
+  {'name': 'עברית', 'locale': Locale('he', 'IL')},
   {'name': 'Magyar', 'locale': Locale('hu', 'HU')},
   {'name': 'Italiano', 'locale': Locale('it', 'IT')},
-  {'name': '한국어', 'locale': Locale('ko', 'KR')},
-  {'name': 'فارسی', 'locale': Locale('fa', 'IR')},
+  {'name': 'ಕನ್ನಡ', 'locale': Locale('kn', 'IN')},
   {'name': 'ქართული', 'locale': Locale('ka', 'GE')},
+  {'name': '한국어', 'locale': Locale('ko', 'KR')},
+  {'name': 'മലയാളം', 'locale': Locale('ml', 'IN')},
+  {'name': 'मराठी', 'locale': Locale('mr', 'IN')},
+  {'name': 'فارسی', 'locale': Locale('fa', 'IR')},
+  {'name': 'ਪੰਜਾਬੀ', 'locale': Locale('pa', 'IN')},
   {'name': 'Nederlands', 'locale': Locale('nl', 'NL')},
+  {'name': 'ଓଡ଼ିଆ', 'locale': Locale('or', 'IN')},
   {'name': 'Polski', 'locale': Locale('pl', 'PL')},
   {'name': 'Português', 'locale': Locale('pt', 'PT')},
   {'name': 'Português (Brasil)', 'locale': Locale('pt', 'BR')},
   {'name': 'Română', 'locale': Locale('ro', 'RO')},
   {'name': 'Русский', 'locale': Locale('ru', 'RU')},
   {'name': 'Slovenčina', 'locale': Locale('sk', 'SK')},
+  {'name': 'தமிழ்', 'locale': Locale('ta', 'IN')},
+  {'name': 'తెలుగు', 'locale': Locale('te', 'IN')},
   {'name': 'Türkçe', 'locale': Locale('tr', 'TR')},
   {'name': 'اردو', 'locale': Locale('ur', 'PK')},
   {'name': '中文(简体)', 'locale': Locale('zh', 'CN')},
@@ -78,15 +91,14 @@ const List<Map<String, dynamic>> appLanguages = [
 ];
 
 @pragma('vm:entry-point')
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) {
-    return WeatherController().updateWidget();
-  });
-}
+void callbackDispatcher() => Workmanager().executeTask(
+  (task, inputData) => WeatherController().updateWidget(),
+);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeApp();
+  Get.put(WeatherController(), permanent: true);
   runApp(const MyApp());
 }
 
@@ -100,16 +112,14 @@ Future<void> initializeApp() async {
     Workmanager().initialize(callbackDispatcher);
     HomeWidget.setAppGroupId(appGroupId);
   }
-  DeviceFeature().init();
+  await DeviceFeature().init();
 }
 
-void setupConnectivityListener() {
-  Connectivity().onConnectivityChanged.listen((result) {
-    isOnline.value = result.contains(ConnectivityResult.none)
-        ? Future.value(false)
-        : InternetConnection().hasInternetAccess;
-  });
-}
+void setupConnectivityListener() => Connectivity().onConnectivityChanged.listen(
+  (result) => isOnline.value = result.contains(ConnectivityResult.none)
+      ? Future.value(false)
+      : InternetConnection().hasInternetAccess,
+);
 
 Future<void> initializeTimeZone() async {
   final TimezoneInfo timeZoneName = await FlutterTimezone.getLocalTimezone();
@@ -124,18 +134,18 @@ Future<void> initializeIsar() async {
     LocationCacheSchema,
     WeatherCardSchema,
   ], directory: (await getApplicationSupportDirectory()).path);
-  settings = isar.settings.where().findFirstSync() ?? Settings();
+  settings = await isar.settings.where().findFirst() ?? Settings();
   locationCache =
-      isar.locationCaches.where().findFirstSync() ?? LocationCache();
+      await isar.locationCaches.where().findFirst() ?? LocationCache();
 
   if (settings.language == null) {
     settings.language = '${Get.deviceLocale}';
-    isar.writeTxnSync(() => isar.settings.putSync(settings));
+    await isar.writeTxn(() => isar.settings.put(settings));
   }
 
   if (settings.theme == null) {
     settings.theme = 'system';
-    isar.writeTxnSync(() => isar.settings.putSync(settings));
+    await isar.writeTxn(() => isar.settings.put(settings));
   }
 }
 
@@ -145,7 +155,9 @@ Future<void> initializeNotifications() async {
     iOS: DarwinInitializationSettings(),
     linux: LinuxInitializationSettings(defaultActionName: 'Rain'),
   );
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  await flutterLocalNotificationsPlugin.initialize(
+    settings: initializationSettings,
+  );
 }
 
 Future<void> setOptimalDisplayMode() async {
@@ -326,6 +338,9 @@ class _MyAppState extends State<MyApp> {
                       : const HomePage()
                 : const OnBoarding(),
             title: 'Rain',
+            builder: (context, child) {
+              return Stack(children: [child!, const SnackBarOverlayWidget()]);
+            },
           );
         },
       ),

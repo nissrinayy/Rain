@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:rain/app/ui/widgets/weather/status/status_weather.dart';
@@ -39,61 +38,49 @@ class _DailyCardState extends State<DailyCard> {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         child: Row(
-          children: [
-            _buildTemperatureInfo(context),
-            const Gap(5),
-            _buildWeatherImage(),
-          ],
+          spacing: 5,
+          children: [_buildTemperatureInfo(context), _buildWeatherImage()],
         ),
       ),
     );
   }
 
-  Widget _buildTemperatureInfo(BuildContext context) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${statusData.getDegree(widget.temperature2MMin?.round())} / ${statusData.getDegree(widget.temperature2MMax?.round())}',
-            style: context.textTheme.titleLarge?.copyWith(
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-            ),
+  Widget _buildTemperatureInfo(BuildContext context) => Expanded(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 5,
+      children: [
+        Text(
+          '${statusData.getDegree(widget.temperature2MMin?.round())} / ${statusData.getDegree(widget.temperature2MMax?.round())}',
+          style: context.textTheme.titleLarge?.copyWith(
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
           ),
-          const Gap(5),
-          _buildDateText(context),
-          const Gap(5),
-          _buildWeatherDescription(context),
-        ],
-      ),
-    );
-  }
+        ),
+        _buildDateText(context),
+        _buildWeatherDescription(context),
+      ],
+    ),
+  );
 
-  Widget _buildDateText(BuildContext context) {
-    return Text(
-      DateFormat.MMMMEEEEd(locale.languageCode).format(widget.timeDaily),
-      style: context.textTheme.titleMedium?.copyWith(
-        color: Colors.grey,
-        fontWeight: FontWeight.w400,
-      ),
-    );
-  }
+  Widget _buildDateText(BuildContext context) => Text(
+    DateFormat.MMMMEEEEd(locale.languageCode).format(widget.timeDaily),
+    style: context.textTheme.titleMedium?.copyWith(
+      color: Colors.grey,
+      fontWeight: FontWeight.w400,
+    ),
+  );
 
-  Widget _buildWeatherDescription(BuildContext context) {
-    return Text(
-      statusWeather.getText(widget.weathercodeDaily),
-      style: context.textTheme.titleMedium?.copyWith(
-        color: Colors.grey,
-        fontWeight: FontWeight.w400,
-      ),
-    );
-  }
+  Widget _buildWeatherDescription(BuildContext context) => Text(
+    statusWeather.getText(widget.weathercodeDaily),
+    style: context.textTheme.titleMedium?.copyWith(
+      color: Colors.grey,
+      fontWeight: FontWeight.w400,
+    ),
+  );
 
-  Widget _buildWeatherImage() {
-    return Image.asset(
-      statusWeather.getImageNowDaily(widget.weathercodeDaily),
-      scale: 6.5,
-    );
-  }
+  Widget _buildWeatherImage() => Image.asset(
+    statusWeather.getImageNowDaily(widget.weathercodeDaily),
+    scale: 6.5,
+  );
 }

@@ -11,6 +11,14 @@ class RoRo {
     'description3':
         'Dacă întâmpinați orice probleme, vă rugăm să ne contactați prin e-mail sau în recenziile aplicației.',
     'next': 'Următorul',
+    'skip': 'Omite',
+    'editCityHint': 'Editați informațiile orașului',
+    'createCityHint': 'Căutați sau introduceți manual datele orașului',
+    'unsavedChanges': 'Modificări nesalvate',
+    'discardChanges': 'Sigur doriți să renunțați la modificări?',
+    'discard': 'Renunță',
+    'save': 'Salvează',
+    'ready': 'Gata',
     'search': 'Caută...',
     'loading': 'Încărcare...',
     'searchCity': 'Caută oraș',
@@ -127,6 +135,7 @@ class RoRo {
     'searchMethod': 'Folosiți căutarea sau geolocația',
     'done': 'Gata',
     'groups': 'Grupurile noastre',
+    'aboutApp': 'Despre aplicație',
     'openMeteo': 'Date de la Open-Meteo (CC-BY 4.0)',
     'hourlyVariables': 'Variabile meteorologice orare',
     'dailyVariables': 'Variabile meteorologice zilnice',
@@ -139,5 +148,9 @@ class RoRo {
     'hideMap': 'Ascunde harta',
     'edit': 'Editare',
     'no_desc_data': 'Fără date',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'A apărut o eroare',
+    'location_not_found': 'Nu s-a putut determina locația dvs.',
   };
 }

@@ -21,6 +21,7 @@ import 'package:rain/app/ui/places/widgets/place_card.dart';
 import 'package:rain/app/ui/widgets/weather/status/status_data.dart';
 import 'package:rain/app/ui/widgets/weather/status/status_weather.dart';
 import 'package:rain/app/ui/widgets/text_form.dart';
+import 'package:rain/app/utils/navigation_helper.dart';
 import 'package:rain/main.dart';
 
 class MapPage extends StatefulWidget {
@@ -33,7 +34,7 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   late final AnimatedMapController _animatedMapController =
       AnimatedMapController(vsync: this);
-  final weatherController = Get.put(WeatherController());
+  final weatherController = Get.find<WeatherController>();
   final statusWeather = StatusWeather();
   final statusData = StatusData();
   final Future<CacheStore> _cacheStoreFuture = _getCacheStore();
@@ -81,21 +82,18 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _resetMapOrientation({LatLng? center, double? zoom}) {
-    _animatedMapController.animateTo(
-      customId: _useTransformer ? _useTransformerId : null,
-      dest: center,
-      zoom: zoom,
-      rotation: 0,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-    );
-  }
+  void _resetMapOrientation({LatLng? center, double? zoom}) =>
+      _animatedMapController.animateTo(
+        customId: _useTransformer ? _useTransformerId : null,
+        dest: center,
+        zoom: zoom,
+        rotation: 0,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
 
   void _onMarkerTap(WeatherCard weatherCard) {
-    setState(() {
-      _selectedWeatherCard = weatherCard;
-    });
+    setState(() => _selectedWeatherCard = weatherCard);
     _animationController.forward();
     _isCardVisible = true;
 
@@ -105,12 +103,12 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   }
 
   void _hideCard() {
-    _animationController.reverse().then((_) {
-      setState(() {
+    _animationController.reverse().then(
+      (_) => setState(() {
         _isCardVisible = false;
         _selectedWeatherCard = null;
-      });
-    });
+      }),
+    );
     _focusNode.unfocus();
   }
 
@@ -120,51 +118,47 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     String sunrise,
     String sunset,
     double temperature2M,
-  ) {
-    return Card(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            statusWeather.getImageNow(weathercode, time, sunrise, sunset),
-            scale: 18,
+  ) => Card(
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset(
+          statusWeather.getImageNow(weathercode, time, sunrise, sunset),
+          scale: 18,
+        ),
+        const MaxGap(5),
+        Text(
+          statusData.getDegree(
+            roundDegree ? temperature2M.round() : temperature2M,
           ),
-          const MaxGap(5),
-          Text(
-            statusData.getDegree(
-              roundDegree ? temperature2M.round() : temperature2M,
-            ),
-            style: context.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+          style: context.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
 
   Marker _buildMainLocationMarker(
     WeatherCard weatherCard,
     int hourOfDay,
     int dayOfNow,
-  ) {
-    return Marker(
-      height: 50,
-      width: 100,
-      point: LatLng(weatherCard.lat!, weatherCard.lon!),
-      child: GestureDetector(
-        onTap: () => _onMarkerTap(weatherCard),
-        child: _buildStyleMarkers(
-          weatherCard.weathercode![hourOfDay],
-          weatherCard.time![hourOfDay],
-          weatherCard.sunrise![dayOfNow],
-          weatherCard.sunset![dayOfNow],
-          weatherCard.temperature2M![hourOfDay],
-        ),
+  ) => Marker(
+    height: 50,
+    width: 100,
+    point: LatLng(weatherCard.lat!, weatherCard.lon!),
+    child: GestureDetector(
+      onTap: () => _onMarkerTap(weatherCard),
+      child: _buildStyleMarkers(
+        weatherCard.weathercode![hourOfDay],
+        weatherCard.time![hourOfDay],
+        weatherCard.sunrise![dayOfNow],
+        weatherCard.sunset![dayOfNow],
+        weatherCard.temperature2M![hourOfDay],
       ),
-    );
-  }
+    ),
+  );
 
   Marker _buildCardMarker(WeatherCard weatherCardList) {
     final hourOfDay = weatherController.getTime(
@@ -193,127 +187,115 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildMapTileLayer(CacheStore cacheStore) {
-    return TileLayer(
-      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      userAgentPackageName: 'com.darkmoonight.rain',
-      tileProvider: CachedTileProvider(
-        store: cacheStore,
-        maxStale: const Duration(days: 30),
-      ),
-    );
-  }
+  Widget _buildMapTileLayer(CacheStore cacheStore) => TileLayer(
+    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    userAgentPackageName: 'com.darkmoonight.rain',
+    tileProvider: CachedTileProvider(
+      store: cacheStore,
+      maxStale: const Duration(days: 30),
+    ),
+  );
 
-  Widget _buildWeatherCard() {
-    return _isCardVisible && _selectedWeatherCard != null
-        ? SlideTransition(
-            position: _offsetAnimation,
-            child: GestureDetector(
-              onTap: () => Get.to(
-                () => PlaceInfo(weatherCard: _selectedWeatherCard!),
-                transition: Transition.downToUp,
-              ),
-              child: PlaceCard(
-                time: _selectedWeatherCard!.time!,
-                timeDaily: _selectedWeatherCard!.timeDaily!,
-                timeDay: _selectedWeatherCard!.sunrise!,
-                timeNight: _selectedWeatherCard!.sunset!,
-                weather: _selectedWeatherCard!.weathercode!,
-                degree: _selectedWeatherCard!.temperature2M!,
-                district: _selectedWeatherCard!.district!,
-                city: _selectedWeatherCard!.city!,
-                timezone: _selectedWeatherCard!.timezone!,
+  Widget _buildWeatherCard() => _isCardVisible && _selectedWeatherCard != null
+      ? SlideTransition(
+          position: _offsetAnimation,
+          child: GestureDetector(
+            onTap: () => NavigationHelper.toDownToUp(
+              () => PlaceInfo(weatherCard: _selectedWeatherCard!),
+            ),
+            child: PlaceCard(
+              time: _selectedWeatherCard!.time!,
+              timeDaily: _selectedWeatherCard!.timeDaily!,
+              timeDay: _selectedWeatherCard!.sunrise!,
+              timeNight: _selectedWeatherCard!.sunset!,
+              weather: _selectedWeatherCard!.weathercode!,
+              degree: _selectedWeatherCard!.temperature2M!,
+              district: _selectedWeatherCard!.district!,
+              city: _selectedWeatherCard!.city!,
+              timezone: _selectedWeatherCard!.timezone!,
+            ),
+          ),
+        )
+      : const SizedBox.shrink();
+
+  Widget _buildSearchField() => RawAutocomplete<Result>(
+    focusNode: _focusNode,
+    textEditingController: _controllerSearch,
+    fieldViewBuilder:
+        (
+          BuildContext context,
+          TextEditingController fieldTextEditingController,
+          FocusNode fieldFocusNode,
+          VoidCallback onFieldSubmitted,
+        ) => MyTextForm(
+          labelText: 'search'.tr,
+          type: TextInputType.text,
+          icon: const Icon(IconsaxPlusLinear.global_search),
+          variant: TextFieldVariant.card,
+          controller: _controllerSearch,
+          margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
+          focusNode: _focusNode,
+          onChanged: (value) {},
+          iconButton: _controllerSearch.text.isNotEmpty
+              ? IconButton(
+                  onPressed: () => _controllerSearch.clear(),
+                  icon: const Icon(
+                    IconsaxPlusLinear.close_circle,
+                    color: Colors.grey,
+                    size: 20,
+                  ),
+                )
+              : null,
+        ),
+    optionsBuilder: (TextEditingValue textEditingValue) {
+      if (textEditingValue.text.isEmpty) {
+        return const Iterable<Result>.empty();
+      }
+      return WeatherAPI().getCity(textEditingValue.text, locale);
+    },
+    onSelected: (Result selection) {
+      _animatedMapController.mapController.move(
+        LatLng(selection.latitude, selection.longitude),
+        14,
+      );
+      _controllerSearch.clear();
+      _focusNode.unfocus();
+    },
+    displayStringForOption: (Result option) =>
+        '${option.name}, ${option.admin1}',
+    optionsViewBuilder:
+        (
+          BuildContext context,
+          AutocompleteOnSelected<Result> onSelected,
+          Iterable<Result> options,
+        ) => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Material(
+              borderRadius: BorderRadius.circular(20),
+              elevation: 4,
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: options.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final Result option = options.elementAt(index);
+                  return InkWell(
+                    onTap: () => onSelected(option),
+                    child: ListTile(
+                      title: Text(
+                        '${option.name}, ${option.admin1}',
+                        style: context.textTheme.labelLarge,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
-          )
-        : const SizedBox.shrink();
-  }
-
-  Widget _buildSearchField() {
-    return RawAutocomplete<Result>(
-      focusNode: _focusNode,
-      textEditingController: _controllerSearch,
-      fieldViewBuilder:
-          (
-            BuildContext context,
-            TextEditingController fieldTextEditingController,
-            FocusNode fieldFocusNode,
-            VoidCallback onFieldSubmitted,
-          ) {
-            return MyTextForm(
-              labelText: 'search'.tr,
-              type: TextInputType.text,
-              icon: const Icon(IconsaxPlusLinear.global_search),
-              controller: _controllerSearch,
-              margin: const EdgeInsets.only(left: 10, right: 10, top: 10),
-              focusNode: _focusNode,
-              onChanged: (value) => setState(() {}),
-              iconButton: _controllerSearch.text.isNotEmpty
-                  ? IconButton(
-                      onPressed: () {
-                        _controllerSearch.clear();
-                      },
-                      icon: const Icon(
-                        IconsaxPlusLinear.close_circle,
-                        color: Colors.grey,
-                        size: 20,
-                      ),
-                    )
-                  : null,
-            );
-          },
-      optionsBuilder: (TextEditingValue textEditingValue) {
-        if (textEditingValue.text.isEmpty) {
-          return const Iterable<Result>.empty();
-        }
-        return WeatherAPI().getCity(textEditingValue.text, locale);
-      },
-      onSelected: (Result selection) {
-        _animatedMapController.mapController.move(
-          LatLng(selection.latitude, selection.longitude),
-          14,
-        );
-        _controllerSearch.clear();
-        _focusNode.unfocus();
-      },
-      displayStringForOption: (Result option) =>
-          '${option.name}, ${option.admin1}',
-      optionsViewBuilder:
-          (
-            BuildContext context,
-            AutocompleteOnSelected<Result> onSelected,
-            Iterable<Result> options,
-          ) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Material(
-                  borderRadius: BorderRadius.circular(20),
-                  elevation: 4.0,
-                  child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    itemCount: options.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final Result option = options.elementAt(index);
-                      return InkWell(
-                        onTap: () => onSelected(option),
-                        child: ListTile(
-                          title: Text(
-                            '${option.name}, ${option.admin1}',
-                            style: context.textTheme.labelLarge,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            );
-          },
-    );
-  }
+          ),
+        ),
+  );
 
   @override
   Widget build(BuildContext context) {

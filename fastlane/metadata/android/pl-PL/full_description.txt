@@ -13,6 +13,6 @@
     <li>🕰️ <strong>Format 12-godzinny lub 24-godzinny:</strong> Dostosuj sposób wyświetlania czasu do swoich preferencji.</li>
     <li>🔔 <strong>Powiadomienia:</strong> Otrzymuj alerty pogodowe i bądź na bieżąco.</li>
     <li>🧩 <strong>Widget:</strong> Dodaj widget pogodowy do ekranu głównego dla szybkich aktualizacji.</li>
-    <li>🎨 <strong>Piękny design:</strong></li>
+    <li>🎨 <strong>Piękny design</strong></li>
 </ul>
 <p>Nasza aplikacja oferuje nie tylko funkcjonalność, ale także zachwyca estetycznym designem. Starannie opracowaliśmy Rain, stawiając na pierwszym miejscu Twoje wrażenia użytkownika, gwarantując zarówno wygodę, jak i elegancję w jednym pakiecie.</p>

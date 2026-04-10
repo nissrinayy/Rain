@@ -1,17 +1,11 @@
 import 'package:get/get.dart';
 
 class Message {
-  String getPressure(int? pressure) {
-    return _getPressureDescription(pressure);
-  }
+  String getPressure(int? pressure) => _getPressureDescription(pressure);
 
-  String getUvIndex(int? uvIndex) {
-    return _getUvIndexDescription(uvIndex);
-  }
+  String getUvIndex(int? uvIndex) => _getUvIndexDescription(uvIndex);
 
-  String getDirection(int? direction) {
-    return _getDirectionDescription(direction);
-  }
+  String getDirection(int? direction) => _getDirectionDescription(direction);
 
   String _getPressureDescription(int? pressure) {
     if (pressure == null) return '';

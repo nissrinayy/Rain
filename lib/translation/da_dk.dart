@@ -11,6 +11,14 @@ class DaDk {
     'description3':
         'Hvis du støder på problemer, må du meget gerne kontakte os via e-mail eller i app anmeldelserne.',
     'next': 'Næste',
+    'skip': 'Spring over',
+    'editCityHint': 'Rediger byoplysninger',
+    'createCityHint': 'Søg efter byoplysninger eller indtast manuelt',
+    'unsavedChanges': 'Ugemte ændringer',
+    'discardChanges': 'Er du sikker på, at du vil kassere dine ændringer?',
+    'discard': 'Kassér',
+    'save': 'Gem',
+    'ready': 'Klar',
     'search': 'Søg...',
     'loading': 'Henter...',
     'searchCity': 'Find din by',
@@ -128,6 +136,7 @@ class DaDk {
     'searchMethod': 'Brug søgning eller geolokation',
     'done': 'Færdig',
     'groups': 'Vores grupper',
+    'aboutApp': 'Om appen',
     'openMeteo': 'Data fra Open-Meteo (CC-BY 4.0)',
     'hourlyVariables': 'Timevise vejrfaktorer',
     'dailyVariables': 'Daglige vejrfaktorer',
@@ -140,5 +149,9 @@ class DaDk {
     'hideMap': 'Skjul kort',
     'edit': 'Rediger',
     'no_desc_data': 'Ingen data',
+    'discord': 'Discord',
+    'telegram': 'Telegram',
+    'error_occurred': 'Der opstod en fejl',
+    'location_not_found': 'Kunne ikke bestemme din placering',
   };
 }
