@@ -152,5 +152,6 @@ class EnUs {
     'discord': 'Discord',
     'telegram': 'Telegram',
     'error_occurred': 'An error occurred',
+    'location_not_found': 'Unable to determine your location',
   };
 }

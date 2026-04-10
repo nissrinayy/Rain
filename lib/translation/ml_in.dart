@@ -152,5 +152,6 @@ class MlIn {
     'discord': 'ഡിസ്കോർഡ്',
     'telegram': 'ടെലിഗ്രാം',
     'error_occurred': 'ഒരു പിശക് സംഭവിച്ചു',
+    'location_not_found': 'നിങ്ങളുടെ സ്ഥാനം നിർണ്ണയിക്കാൻ കഴിഞ്ഞില്ല',
   };
 }

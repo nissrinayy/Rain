@@ -152,5 +152,6 @@ class PaIn {
     'discord': 'ਡਿਸਕਾਰਡ',
     'telegram': 'ਟੈਲੀਗ੍ਰਾਮ',
     'error_occurred': 'ਇੱਕ ਗਲਤੀ ਹੋਈ',
+    'location_not_found': 'ਤੁਹਾਡੀ ਸਥਿਤੀ ਦਾ ਪਤਾ ਨਹੀਂ ਲੱਗ ਸਕਿਆ',
   };
 }

@@ -155,5 +155,6 @@ class OrIn {
     'discord': 'ଡିସ୍କର୍ଡ',
     'telegram': 'ଟେଲିଗ୍ରାମ',
     'error_occurred': 'ଏକ ତ୍ରୁଟି ଘଟିଛି',
+    'location_not_found': 'ଆପଣଙ୍କର ଅବସ୍ଥାନ ନିର୍ଦ୍ଧାରଣ କରାଯାଇପାରିଲା ନାହିଁ',
   };
 }

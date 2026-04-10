@@ -115,26 +115,36 @@ class WeatherController extends GetxController {
       return;
     }
 
-    final position = await _determinePosition();
-    final placemarks = await placemarkFromCoordinates(
-      position.latitude,
-      position.longitude,
-    );
-    final place = placemarks[0];
+    try {
+      final position = await _determinePosition();
+      final placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+      if (placemarks.isEmpty) {
+        showSnackBar('location_not_found'.tr);
+        isLoading.value = false;
+        return;
+      }
+      final place = placemarks[0];
 
-    _latitude.value = position.latitude;
-    _longitude.value = position.longitude;
-    _district.value = place.administrativeArea ?? '';
-    _city.value = place.locality ?? '';
+      _latitude.value = position.latitude;
+      _longitude.value = position.longitude;
+      _district.value = place.administrativeArea ?? '';
+      _city.value = place.locality ?? '';
 
-    _mainWeather.value = await WeatherAPI().getWeatherData(
-      _latitude.value,
-      _longitude.value,
-    );
+      _mainWeather.value = await WeatherAPI().getWeatherData(
+        _latitude.value,
+        _longitude.value,
+      );
 
-    notificationCheck();
-    await writeCache();
-    await readCache();
+      notificationCheck();
+      await writeCache();
+      await readCache();
+    } catch (e) {
+      showSnackBar('error_occurred'.tr, isError: true);
+      await readCache();
+    }
   }
 
   Future<Map<String, dynamic>> getCurrentLocationSearch() async {
@@ -181,19 +191,24 @@ class WeatherController extends GetxController {
       return;
     }
 
-    _latitude.value = latitude;
-    _longitude.value = longitude;
-    _district.value = district;
-    _city.value = locality;
+    try {
+      _latitude.value = latitude;
+      _longitude.value = longitude;
+      _district.value = district;
+      _city.value = locality;
 
-    _mainWeather.value = await WeatherAPI().getWeatherData(
-      _latitude.value,
-      _longitude.value,
-    );
+      _mainWeather.value = await WeatherAPI().getWeatherData(
+        _latitude.value,
+        _longitude.value,
+      );
 
-    notificationCheck();
-    await writeCache();
-    await readCache();
+      notificationCheck();
+      await writeCache();
+      await readCache();
+    } catch (e) {
+      showSnackBar('error_occurred'.tr, isError: true);
+      await readCache();
+    }
   }
 
   Future<void> readCache() async {

@@ -152,5 +152,6 @@ class HuHu {
     'discord': 'Discord',
     'telegram': 'Telegram',
     'error_occurred': 'Hiba történt',
+    'location_not_found': 'Nem sikerült meghatározni a tartózkodási helyét',
   };
 }

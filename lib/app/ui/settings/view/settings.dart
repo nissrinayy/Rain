@@ -48,6 +48,14 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() => appVersion = packageInfo.version);
   }
 
+  String _safeFormatTime(String? timeStr) {
+    try {
+      return weatherController.formatTime(timeStr);
+    } catch (e) {
+      return '--:--';
+    }
+  }
+
   Future<void> _updateLanguage(Locale locale) async {
     settings.language = '$locale';
     await isar.writeTxn(() => isar.settings.put(settings));
@@ -189,13 +197,13 @@ class _SettingsPageState extends State<SettingsPage> {
         SettingsTile(
           leading: const Icon(IconsaxPlusLinear.timer_start),
           title: 'timeStart',
-          value: weatherController.formatTime(timeStart),
+          value: _safeFormatTime(timeStart),
           onTap: () => _showTimeStartPicker(context),
         ),
         SettingsTile(
           leading: const Icon(IconsaxPlusLinear.timer_pause),
           title: 'timeEnd',
-          value: weatherController.formatTime(timeEnd),
+          value: _safeFormatTime(timeEnd),
           onTap: () => _showTimeEndPicker(context),
         ),
       ],

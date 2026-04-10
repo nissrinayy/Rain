@@ -152,5 +152,6 @@ class ItIt {
     'discord': 'Discord',
     'telegram': 'Telegram',
     'error_occurred': 'Si è verificato un errore',
+    'location_not_found': 'Impossibile determinare la tua posizione',
   };
 }

@@ -152,5 +152,6 @@ class HeIl {
     'discord': 'דיסקורד',
     'telegram': 'טלגרם',
     'error_occurred': 'אירעה שגיאה',
+    'location_not_found': 'לא ניתן לקבוע את מיקומך',
   };
 }

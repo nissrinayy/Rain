@@ -152,5 +152,6 @@ class GuIn {
     'discord': 'ડિસ્કોર્ડ',
     'telegram': 'ટેલિગ્રામ',
     'error_occurred': 'એક ભૂલ થઈ',
+    'location_not_found': 'તમારું સ્થાન નક્કી કરી શકાયું નહીં',
   };
 }

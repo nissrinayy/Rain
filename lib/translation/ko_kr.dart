@@ -148,5 +148,6 @@ class KoKr {
     'discord': '디스코드',
     'telegram': '텔레그램',
     'error_occurred': '오류가 발생했습니다',
+    'location_not_found': '위치 확인 불가',
   };
 }

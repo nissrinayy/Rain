@@ -155,5 +155,6 @@ class GaIe {
     'discord': 'Discord',
     'telegram': 'Telegram',
     'error_occurred': 'Tharla earráid',
+    'location_not_found': 'Níorbh fhéidir do shuíomh a chinneadh',
   };
 }

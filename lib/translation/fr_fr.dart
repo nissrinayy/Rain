@@ -154,5 +154,6 @@ class FrFr {
     'discord': 'Discord',
     'telegram': 'Telegram',
     'error_occurred': 'Une erreur s\'est produite',
+    'location_not_found': 'Impossible de déterminer votre position',
   };
 }

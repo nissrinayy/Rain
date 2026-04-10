@@ -152,5 +152,6 @@ class TeIn {
     'discord': 'డిస్కార్డ్',
     'telegram': 'టెలిగ్రామ్',
     'error_occurred': 'లోపం సంభవించింది',
+    'location_not_found': 'మీ స్థానాన్ని నిర్ధారించలేకపోయాము',
   };
 }

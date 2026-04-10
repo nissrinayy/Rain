@@ -153,5 +153,6 @@ class EsEs {
     'discord': 'Discord',
     'telegram': 'Telegram',
     'error_occurred': 'Se produjo un error',
+    'location_not_found': 'No se pudo determinar tu ubicación',
   };
 }

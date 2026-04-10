@@ -151,5 +151,6 @@ class ArSa {
     'discord': 'ديسكورد',
     'telegram': 'تيليجرام',
     'error_occurred': 'حدث خطأ',
+    'location_not_found': 'تعذر تحديد موقعك',
   };
 }

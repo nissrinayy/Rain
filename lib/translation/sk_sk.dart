@@ -152,5 +152,6 @@ class SkSk {
     'discord': 'Discord',
     'telegram': 'Telegram',
     'error_occurred': 'Vyskytla sa chyba',
+    'location_not_found': 'Nepodarilo sa určiť vašu polohu',
   };
 }

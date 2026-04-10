@@ -148,5 +148,6 @@ class ZhTw {
     'discord': 'Discord',
     'telegram': 'Telegram',
     'error_occurred': '發生錯誤',
+    'location_not_found': '無法確定您的位置',
   };
 }

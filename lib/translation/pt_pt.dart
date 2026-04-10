@@ -152,5 +152,6 @@ class PtPt {
     'discord': 'Discord',
     'telegram': 'Telegram',
     'error_occurred': 'Ocorreu um erro',
+    'location_not_found': 'Não foi possível determinar a sua localização',
   };
 }

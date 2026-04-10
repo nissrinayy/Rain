@@ -152,5 +152,6 @@ class KnIn {
     'discord': 'ಡಿಸ್ಕಾರ್ಡ್',
     'telegram': 'ಟೆಲಿಗ್ರಾಮ್',
     'error_occurred': 'ದೋಷ ಸಂಭವಿಸಿದೆ',
+    'location_not_found': 'ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ನಿರ್ಧರಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ',
   };
 }

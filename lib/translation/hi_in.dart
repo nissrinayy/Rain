@@ -150,5 +150,6 @@ class HiIn {
     'discord': 'डिस्कॉर्ड',
     'telegram': 'टेलीग्राम',
     'error_occurred': 'एक त्रुटि हुई',
+    'location_not_found': 'आपका स्थान निर्धारित नहीं किया जा सका',
   };
 }

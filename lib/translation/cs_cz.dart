@@ -152,5 +152,6 @@ class CsCz {
     'discord': 'Discord',
     'telegram': 'Telegram',
     'error_occurred': 'Došlo k chybě',
+    'location_not_found': 'Nepodařilo se určit vaši polohu',
   };
 }

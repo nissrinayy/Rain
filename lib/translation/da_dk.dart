@@ -152,5 +152,6 @@ class DaDk {
     'discord': 'Discord',
     'telegram': 'Telegram',
     'error_occurred': 'Der opstod en fejl',
+    'location_not_found': 'Kunne ikke bestemme din placering',
   };
 }

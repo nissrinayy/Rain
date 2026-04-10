@@ -152,5 +152,6 @@ class RuRu {
     'discord': 'Discord',
     'telegram': 'Telegram',
     'error_occurred': 'Произошла ошибка',
+    'location_not_found': 'Не удалось определить ваше местоположение',
   };
 }

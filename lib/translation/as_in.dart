@@ -154,5 +154,6 @@ class AsIn {
     'discord': 'ডিস্কৰ্ড',
     'telegram': 'টেলিগ্ৰাম',
     'error_occurred': 'এটা ত্ৰুটি হৈছে',
+    'location_not_found': 'আপোনাৰ অৱস্থান নিৰ্ধাৰণ কৰিব পৰা নগ\'ল',
   };
 }

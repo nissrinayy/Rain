@@ -151,5 +151,6 @@ class KaGe {
     'discord': 'Discord',
     'telegram': 'Telegram',
     'error_occurred': 'მომხდარია შეცდომა',
+    'location_not_found': 'თქვენი მდებარეობის დადგენა ვერ მოხერხდა',
   };
 }

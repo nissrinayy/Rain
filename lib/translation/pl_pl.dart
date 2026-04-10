@@ -151,5 +151,6 @@ class PlPl {
     'discord': 'Discord',
     'telegram': 'Telegram',
     'error_occurred': 'Wystąpił błąd',
+    'location_not_found': 'Nie udało się określić Twojej lokalizacji',
   };
 }
