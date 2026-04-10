@@ -9,6 +9,7 @@ import 'package:rain/app/ui/widgets/weather/hourly.dart';
 import 'package:rain/app/ui/widgets/weather/now.dart';
 import 'package:rain/app/ui/widgets/shimmer.dart';
 import 'package:rain/app/ui/widgets/weather/sunset_sunrise.dart';
+import 'package:rain/app/utils/navigation_helper.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class MainPage extends StatefulWidget {
@@ -206,9 +207,8 @@ class _MainPageState extends State<MainPage> {
 
   Widget _buildDailyContainer(WeatherCard weatherCard) => DailyContainer(
     weatherData: weatherCard,
-    onTap: () => Get.to(
+    onTap: () => NavigationHelper.toDownToUp(
       () => DailyCardList(weatherData: weatherCard),
-      transition: Transition.downToUp,
     ),
   );
 }

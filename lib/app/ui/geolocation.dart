@@ -13,6 +13,7 @@ import 'package:rain/app/ui/home.dart';
 import 'package:rain/app/ui/widgets/button.dart';
 import 'package:rain/app/ui/widgets/confirmation_dialog.dart';
 import 'package:rain/app/ui/widgets/text_form.dart';
+import 'package:rain/app/utils/navigation_helper.dart';
 import 'package:rain/main.dart';
 
 class SelectGeolocation extends StatefulWidget {
@@ -322,8 +323,8 @@ class _SelectGeolocationState extends State<SelectGeolocation> {
           _controllerCity.text,
         );
         widget.isStart
-            ? Get.off(() => const HomePage(), transition: Transition.downToUp)
-            : Get.back();
+            ? NavigationHelper.offDownToUp(() => const HomePage())
+            : NavigationHelper.back();
       } catch (error) {
         Future.error(error);
       }
@@ -406,7 +407,7 @@ class _SelectGeolocationState extends State<SelectGeolocation> {
     leading: widget.isStart
         ? null
         : IconButton(
-            onPressed: () => Get.back(),
+            onPressed: () => NavigationHelper.back(),
             icon: const Icon(IconsaxPlusLinear.arrow_left_3, size: 20),
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,

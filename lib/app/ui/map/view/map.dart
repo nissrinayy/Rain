@@ -21,6 +21,7 @@ import 'package:rain/app/ui/places/widgets/place_card.dart';
 import 'package:rain/app/ui/widgets/weather/status/status_data.dart';
 import 'package:rain/app/ui/widgets/weather/status/status_weather.dart';
 import 'package:rain/app/ui/widgets/text_form.dart';
+import 'package:rain/app/utils/navigation_helper.dart';
 import 'package:rain/main.dart';
 
 class MapPage extends StatefulWidget {
@@ -199,9 +200,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       ? SlideTransition(
           position: _offsetAnimation,
           child: GestureDetector(
-            onTap: () => Get.to(
+            onTap: () => NavigationHelper.toDownToUp(
               () => PlaceInfo(weatherCard: _selectedWeatherCard!),
-              transition: Transition.downToUp,
             ),
             child: PlaceCard(
               time: _selectedWeatherCard!.time!,

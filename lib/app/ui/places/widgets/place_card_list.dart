@@ -6,6 +6,7 @@ import 'package:rain/app/data/db.dart';
 import 'package:rain/app/ui/places/view/place_info.dart';
 import 'package:rain/app/ui/places/widgets/place_card.dart';
 import 'package:rain/app/ui/widgets/confirmation_dialog.dart';
+import 'package:rain/app/utils/navigation_helper.dart';
 import 'package:reorderables/reorderables.dart';
 
 class PlaceCardList extends StatefulWidget {
@@ -76,16 +77,15 @@ class _PlaceCardListState extends State<PlaceCardList> {
         context: context,
         title: 'deletedCardWeather',
         message: 'deletedCardWeatherQuery',
-        onConfirm: () => Get.back(result: true),
+        onConfirm: () => NavigationHelper.back(result: true),
       );
 
   Widget _buildCardGestureDetector(
     BuildContext context,
     WeatherCard weatherCard,
   ) => GestureDetector(
-    onTap: () => Get.to(
+    onTap: () => NavigationHelper.toDownToUp(
       () => PlaceInfo(weatherCard: weatherCard),
-      transition: Transition.downToUp,
     ),
     child: PlaceCard(
       time: weatherCard.time!,

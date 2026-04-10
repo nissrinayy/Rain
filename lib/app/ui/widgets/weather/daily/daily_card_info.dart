@@ -10,6 +10,7 @@ import 'package:rain/app/ui/widgets/weather/now.dart';
 import 'package:rain/app/ui/widgets/weather/status/status_data.dart';
 import 'package:rain/app/ui/widgets/weather/status/status_weather.dart';
 import 'package:rain/app/ui/widgets/weather/sunset_sunrise.dart';
+import 'package:rain/app/utils/navigation_helper.dart';
 import 'package:rain/main.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -82,7 +83,7 @@ class _DailyCardInfoState extends State<DailyCardInfo> {
     automaticallyImplyLeading: false,
     centerTitle: true,
     leading: IconButton(
-      onPressed: () => Get.back(),
+      onPressed: () => NavigationHelper.back(),
       icon: const Icon(IconsaxPlusLinear.arrow_left_3, size: 20),
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,

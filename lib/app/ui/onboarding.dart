@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rain/app/constants/app_constants.dart';
 import 'package:rain/app/data/db.dart';
 import 'package:rain/app/ui/geolocation.dart';
+import 'package:rain/app/utils/navigation_helper.dart';
 import 'package:rain/app/utils/responsive_utils.dart';
 import 'package:rain/main.dart';
 import 'package:get/get.dart';
@@ -74,9 +75,8 @@ class _OnBoardingState extends State<OnBoarding> {
 
     if (!mounted) return;
 
-    Get.off(
+    NavigationHelper.offDownToUp(
       () => const SelectGeolocation(isStart: true),
-      transition: Transition.downToUp,
     );
   }
 

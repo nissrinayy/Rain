@@ -17,6 +17,7 @@ import 'package:rain/app/ui/settings/widgets/selection_dialog.dart';
 import 'package:rain/app/ui/settings/widgets/settings_section.dart';
 import 'package:rain/app/ui/settings/widgets/settings_tile.dart';
 import 'package:rain/app/ui/widgets/confirmation_dialog.dart';
+import 'package:rain/app/utils/navigation_helper.dart';
 import 'package:rain/main.dart';
 import 'package:rain/theme/theme_controller.dart';
 import 'package:rain/app/utils/color_converter.dart';
@@ -777,7 +778,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     context,
                     newWidgetBackgroundColor: colorBackground,
                   );
-                  Get.back();
+                  NavigationHelper.back();
                 },
               ),
             ],
@@ -828,7 +829,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   if (colorText == null) return;
                   weatherController.updateWidgetTextColor(colorText!);
                   MyApp.updateAppState(context, newWidgetTextColor: colorText);
-                  Get.back();
+                  NavigationHelper.back();
                 },
               ),
             ],

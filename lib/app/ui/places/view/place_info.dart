@@ -10,6 +10,7 @@ import 'package:rain/app/ui/widgets/weather/desc/desc_container.dart';
 import 'package:rain/app/ui/widgets/weather/hourly.dart';
 import 'package:rain/app/ui/widgets/weather/now.dart';
 import 'package:rain/app/ui/widgets/weather/sunset_sunrise.dart';
+import 'package:rain/app/utils/navigation_helper.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class PlaceInfo extends StatefulWidget {
@@ -85,7 +86,7 @@ class _PlaceInfoState extends State<PlaceInfo> {
     centerTitle: true,
     automaticallyImplyLeading: false,
     leading: IconButton(
-      onPressed: () => Get.back(),
+      onPressed: () => NavigationHelper.back(),
       icon: const Icon(IconsaxPlusLinear.arrow_left_3, size: 20),
     ),
     title: Text(
@@ -197,9 +198,8 @@ class _PlaceInfoState extends State<PlaceInfo> {
 
   Widget _buildDailyContainer(WeatherCard weatherCard) => DailyContainer(
     weatherData: weatherCard,
-    onTap: () => Get.to(
+    onTap: () => NavigationHelper.toDownToUp(
       () => DailyCardList(weatherData: weatherCard),
-      transition: Transition.downToUp,
     ),
   );
 }

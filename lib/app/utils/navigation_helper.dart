@@ -5,6 +5,27 @@ import 'package:rain/app/constants/app_constants.dart';
 class NavigationHelper {
   static const _defaultDuration = AppConstants.animationDuration;
 
+  static Future<T?>? to<T>(
+    Widget Function() page, {
+    Transition transition = Transition.rightToLeft,
+  }) {
+    return Get.to<T>(
+      page,
+      transition: transition,
+      duration: _defaultDuration,
+      preventDuplicates: true,
+    );
+  }
+
+  static Future<T?>? toDownToUp<T>(Widget Function() page) {
+    return Get.to<T>(
+      page,
+      transition: Transition.downToUp,
+      duration: _defaultDuration,
+      preventDuplicates: true,
+    );
+  }
+
   static Future<T?>? slideUp<T>(Widget page) {
     return Get.to<T>(
       () => page,
@@ -32,6 +53,25 @@ class NavigationHelper {
     );
   }
 
+  static Future<T?>? off<T>(
+    Widget Function() page, {
+    Transition transition = Transition.rightToLeft,
+  }) {
+    return Get.off<T>(
+      page,
+      transition: transition,
+      duration: _defaultDuration,
+    );
+  }
+
+  static Future<T?>? offDownToUp<T>(Widget Function() page) {
+    return Get.off<T>(
+      page,
+      transition: Transition.downToUp,
+      duration: _defaultDuration,
+    );
+  }
+
   static void closeAll() {
     Get.until((route) => route.isFirst);
   }
@@ -56,7 +96,7 @@ class NavigationHelper {
     );
   }
 
-  static Future<T?> showModalSheet<T>({
+  static Future<T?>? showModalSheet<T>({
     required BuildContext context,
     required Widget child,
     bool isDismissible = true,
@@ -72,7 +112,7 @@ class NavigationHelper {
     );
   }
 
-  static Future<T?> showAppDialog<T>({
+  static Future<T?>? showAppDialog<T>({
     required BuildContext context,
     required Widget child,
     bool barrierDismissible = true,

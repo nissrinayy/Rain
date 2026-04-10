@@ -12,6 +12,7 @@ import 'package:rain/app/ui/geolocation.dart';
 import 'package:rain/app/ui/main/view/main_page.dart';
 import 'package:rain/app/ui/map/view/map.dart';
 import 'package:rain/app/ui/settings/view/settings.dart';
+import 'package:rain/app/utils/navigation_helper.dart';
 import 'package:rain/main.dart';
 
 class HomePage extends StatefulWidget {
@@ -233,9 +234,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         automaticallyImplyLeading: false,
         leading: tabIndex == 0
             ? IconButton(
-                onPressed: () => Get.to(
+                onPressed: () => NavigationHelper.toDownToUp(
                   () => const SelectGeolocation(isStart: false),
-                  transition: Transition.downToUp,
                 ),
                 icon: const Icon(IconsaxPlusLinear.global_search, size: 18),
               )

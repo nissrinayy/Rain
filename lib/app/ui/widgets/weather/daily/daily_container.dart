@@ -6,6 +6,7 @@ import 'package:rain/app/data/db.dart';
 import 'package:rain/app/ui/widgets/weather/daily/daily_card_info.dart';
 import 'package:rain/app/ui/widgets/weather/status/status_data.dart';
 import 'package:rain/app/ui/widgets/weather/status/status_weather.dart';
+import 'package:rain/app/utils/navigation_helper.dart';
 import 'package:rain/main.dart';
 
 class DailyContainer extends StatefulWidget {
@@ -85,9 +86,8 @@ class _DailyContainerState extends State<DailyContainer> {
   ) => InkWell(
     splashColor: context.theme.colorScheme.primary.withValues(alpha: 0.4),
     borderRadius: BorderRadius.all(Radius.circular(16)),
-    onTap: () => Get.to(
+    onTap: () => NavigationHelper.toDownToUp(
       () => DailyCardInfo(weatherData: weatherData, index: index),
-      transition: Transition.downToUp,
     ),
     child: Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
