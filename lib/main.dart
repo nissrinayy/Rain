@@ -14,9 +14,7 @@ import 'package:isar_community/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rain/app/controller/controller.dart';
 import 'package:rain/app/data/db.dart';
-import 'package:rain/app/ui/geolocation.dart';
 import 'package:rain/app/ui/home.dart';
-import 'package:rain/app/ui/onboarding.dart';
 import 'package:rain/app/utils/snackbar_overlay.dart';
 import 'package:rain/theme/theme.dart';
 import 'package:rain/theme/theme_controller.dart';
@@ -147,6 +145,24 @@ Future<void> initializeIsar() async {
     settings.theme = 'system';
     await isar.writeTxn(() => isar.settings.put(settings));
   }
+
+  // Skip onboarding and set default location
+  if (!settings.onboard) {
+    settings.onboard = true;
+    await isar.writeTxn(() => isar.settings.put(settings));
+  }
+
+  // Always set hardcoded location (Jakarta, Indonesia)
+  locationCache = LocationCache(
+    lat: -6.2088,
+    lon: 106.8456,
+    city: 'Jakarta',
+    district: 'Central Jakarta',
+  );
+  await isar.writeTxn(() async {
+    await isar.locationCaches.clear();
+    await isar.locationCaches.put(locationCache);
+  });
 }
 
 Future<void> initializeNotifications() async {
@@ -329,14 +345,7 @@ class _MyAppState extends State<MyApp> {
                 .map((e) => e['locale'] as Locale)
                 .toList(),
             debugShowCheckedModeBanner: false,
-            home: settings.onboard
-                ? (locationCache.city == null ||
-                          locationCache.district == null ||
-                          locationCache.lat == null ||
-                          locationCache.lon == null)
-                      ? const SelectGeolocation(isStart: true)
-                      : const HomePage()
-                : const OnBoarding(),
+            home: const HomePage(),
             title: 'Rain',
             builder: (context, child) {
               return Stack(children: [child!, const SnackBarOverlayWidget()]);
