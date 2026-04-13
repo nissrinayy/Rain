@@ -98,11 +98,15 @@ pipeline {
         stage('SAST - Static Analysis (MobSF)') {
             steps {
                 script {
-                    def apkPath = "build/app/outputs/flutter-apk/app-${params.BUILD_TYPE}.apk"
+                    def apkPath = "${WORKSPACE}\\build\\app\\outputs\\flutter-apk\\app-${params.BUILD_TYPE}.apk"
+                    
+                    echo "Checking for APK: ${apkPath}"
+                    
                     if (!fileExists(apkPath)) {
+                        // Coba list files untuk debug
+                        bat "dir \"${WORKSPACE}\\build\\app\\outputs\\flutter-apk\\\" || echo Directory not found"
                         error "APK not found: ${apkPath}"
                     }
-
                     echo "Uploading APK to MobSF (SAST)..."
 
                     def uploadResponse = bat(
@@ -168,8 +172,8 @@ pipeline {
             steps {
                 script {
                     def timestamp  = new Date().format("dd-MM-yyyy_HH-mm-ss")
-                    def sourcePath = "build\\app\\outputs\\flutter-apk\\app-${params.BUILD_TYPE}.apk"
-                    def destPath   = "apk-outputs\\todo-${params.BUILD_TYPE}-${timestamp}.apk"
+                    def sourcePath = "${WORKSPACE}\\build\\app\\outputs\\flutter-apk\\app-${params.BUILD_TYPE}.apk"
+                    def destPath   = "${WORKSPACE}\\apk-outputs\\rain-${params.BUILD_TYPE}-${timestamp}.apk"
 
                     bat "copy \"${sourcePath}\" \"${destPath}\""
 
