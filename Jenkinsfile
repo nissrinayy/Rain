@@ -79,7 +79,21 @@ pipeline {
                 """
             }
         }
-
+                // ================= VERIFY APK =================
+        stage('Verify APK Build') {
+            steps {
+                bat """
+                echo Checking APK output directory...
+                if exist build\\app\\outputs\\flutter-apk (
+                    echo APK directory found
+                    dir build\\app\\outputs\\flutter-apk
+                ) else (
+                    echo ERROR: APK directory not found
+                    exit /b 1
+                )
+                """
+            }
+        }
         // ================= SAST =================
         stage('SAST - Static Analysis (MobSF)') {
             steps {
