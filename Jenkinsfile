@@ -73,8 +73,20 @@ pipeline {
         stage('Build APK') {
             steps {
                 bat """
+                echo ====== FLUTTER VERSION ======
+                flutter --version
+                
+                echo ====== CLEAN & DEPENDENCIES ======
+                flutter clean
                 flutter pub get
+                
+                echo ====== GENERATE CODE ======
+                dart run build_runner build
+                
+                echo ====== BUILD APK ======
                 flutter build apk --${params.BUILD_TYPE}
+                
+                echo ====== APK OUTPUT ======
                 dir build\\app\\outputs\\flutter-apk
                 """
             }
