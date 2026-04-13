@@ -31,7 +31,7 @@ pipeline {
         ANDROID_HOME     = "C:\\Users\\Nisrina\\AppData\\Local\\Android\\Sdk"
         ANDROID_SDK_ROOT = "${ANDROID_HOME}"
         FLUTTER_HOME     = "D:\\MobDev\\Flutter SDK\\flutter"
-        JAVA_HOME = "C:\\Program Files\\Android\\Android Studio\\jbr"
+        JAVA_HOME        = "C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.17.10-hotspot"
 
         PATH = "${FLUTTER_HOME}\\bin;${JAVA_HOME}\\bin;${ANDROID_HOME}\\platform-tools;${ANDROID_HOME}\\emulator;${env.PATH}"
 
@@ -77,6 +77,13 @@ pipeline {
                 flutter build apk --${params.BUILD_TYPE}
                 dir build\\app\\outputs\\flutter-apk
                 """
+                script {
+                    def apkFullPath = "${env.WORKSPACE}\\build\\app\\outputs\\flutter-apk\\app-${params.BUILD_TYPE}.apk"
+                    if (!fileExists(apkFullPath)) {
+                        error "Build APK stage completed but APK not found at: ${apkFullPath}"
+                    }
+                    echo "APK successfully built at: ${apkFullPath}"
+                }
             }
         }
 
@@ -84,9 +91,14 @@ pipeline {
         stage('SAST - Static Analysis (MobSF)') {
             steps {
                 script {
-                    def apkPath = "build/app/outputs/flutter-apk/app-${params.BUILD_TYPE}.apk"
-                    if (!fileExists(apkPath)) {
-                        error "APK not found: ${apkPath}"
+                    def apkRelPath  = "build\\app\\outputs\\flutter-apk\\app-${params.BUILD_TYPE}.apk"
+                    def apkFullPath = "${env.WORKSPACE}\\${apkRelPath}"
+
+                    // Debug: list directory to confirm APK exists
+                    bat "dir build\\app\\outputs\\flutter-apk\\ || echo Directory not found"
+
+                    if (!fileExists(apkFullPath)) {
+                        error "APK not found: ${apkFullPath}"
                     }
 
                     echo "Uploading APK to MobSF (SAST)..."
@@ -95,14 +107,14 @@ pipeline {
                         script: """
                         @curl -s ^
                         -H "Authorization: ${env.MOBSF_TOKEN}" ^
-                        -F "file=@${apkPath}" ^
+                        -F "file=@${apkFullPath}" ^
                         ${env.MOBSF_URL}/api/v1/upload
                         """,
                         returnStdout: true
                     ).trim()
 
                     def apkHash = extractHashFromResponse(uploadResponse)
-                    if (!apkHash) error "MobSF upload failed"
+                    if (!apkHash) error "MobSF upload failed — no hash returned. Response: ${uploadResponse}"
 
                     env.APK_HASH = apkHash
                     echo "SAST Hash: ${apkHash}"
@@ -129,6 +141,8 @@ pipeline {
                         writeFile file: 'sast_report.json', text: json
                         archiveArtifacts artifacts: 'sast_report.json'
                         echo "✅ SAST Report URL: ${env.MOBSF_URL}/static_analyzer/${apkHash}/"
+                    } else {
+                        echo "⚠️ SAST JSON report could not be parsed."
                     }
                 }
             }
@@ -154,8 +168,8 @@ pipeline {
             steps {
                 script {
                     def timestamp  = new Date().format("dd-MM-yyyy_HH-mm-ss")
-                    def sourcePath = "build\\app\\outputs\\flutter-apk\\app-${params.BUILD_TYPE}.apk"
-                    def destPath   = "apk-outputs\\todo-${params.BUILD_TYPE}-${timestamp}.apk"
+                    def sourcePath = "${env.WORKSPACE}\\build\\app\\outputs\\flutter-apk\\app-${params.BUILD_TYPE}.apk"
+                    def destPath   = "${env.WORKSPACE}\\apk-outputs\\todo-${params.BUILD_TYPE}-${timestamp}.apk"
 
                     bat "copy \"${sourcePath}\" \"${destPath}\""
 
@@ -207,6 +221,8 @@ pipeline {
                     def tlsJson = cleanJsonString(tlsRaw)
                     if (tlsJson) {
                         writeFile file: 'tls_report.json', text: tlsJson
+                    } else {
+                        echo "⚠️ TLS JSON report could not be parsed."
                     }
 
                     bat """
@@ -230,7 +246,9 @@ pipeline {
                     if (json) {
                         writeFile file: 'dast_report.json', text: json
                         archiveArtifacts artifacts: 'dast_report.json, tls_report.json', allowEmptyArchive: true
-                        echo "✅ DAST Report URL: ${env.MOBSF_URL}/dynamic_report/${env.APK_HASH}/ "
+                        echo "✅ DAST Report URL: ${env.MOBSF_URL}/dynamic_report/${env.APK_HASH}/"
+                    } else {
+                        echo "⚠️ DAST JSON report could not be parsed."
                     }
                 }
             }
@@ -242,49 +260,54 @@ pipeline {
                 bat 'taskkill /F /IM qemu-system-x86_64.exe /T || echo Emulator already stopped'
             }
         }
-stage('Download PDF Report') {
-    steps {
-        script {
-            if (env.APK_HASH) {
 
-                bat """
-                @curl -s -X POST ^
-                -H "Authorization: ${env.MOBSF_TOKEN}" ^
-                --data "hash=${env.APK_HASH}" ^
-                ${env.MOBSF_URL}/api/v1/download_pdf ^
-                -o sast_report.pdf
-                """
-                echo "Downloading DAST PDF (Custom)..."
-                bat """
-                @curl -L -f ^
-                ${env.MOBSF_URL}/dynamic_pdf/${env.APK_HASH}/ ^
-                --output dast_report.pdf --silent --show-error
-                """
+        // ================= DOWNLOAD PDF =================
+        stage('Download PDF Report') {
+            steps {
+                script {
+                    if (env.APK_HASH) {
+                        echo "Downloading SAST PDF..."
+                        bat """
+                        @curl -s -X POST ^
+                        -H "Authorization: ${env.MOBSF_TOKEN}" ^
+                        --data "hash=${env.APK_HASH}" ^
+                        ${env.MOBSF_URL}/api/v1/download_pdf ^
+                        -o sast_report.pdf
+                        """
 
-                sleep 2
- 
+                        echo "Downloading DAST PDF..."
+                        bat """
+                        @curl -L -f ^
+                        ${env.MOBSF_URL}/dynamic_pdf/${env.APK_HASH}/ ^
+                        --output dast_report.pdf --silent --show-error
+                        """
 
-                bat "dir dast_report.pdf"
-                bat "for %%I in (dast_report.pdf) do @echo Size: %%~zI bytes"
+                        sleep 2
 
-            } else {
-                echo "APK_HASH not found."
-            }
-            def size = bat(
-                script: '@for %%I in (dast_report.pdf) do @echo %%~zI',
-                returnStdout: true
-            ).trim().split("\\r?\\n")[-1]
+                        bat "dir dast_report.pdf"
+                        bat "for %%I in (dast_report.pdf) do @echo Size: %%~zI bytes"
 
-            if (size.toInteger() < 50000) {
-                error "DAST PDF INVALID: ${size} bytes"
+                        def size = bat(
+                            script: '@for %%I in (dast_report.pdf) do @echo %%~zI',
+                            returnStdout: true
+                        ).trim().split("\\r?\\n")[-1]
+
+                        if (size.toInteger() < 50000) {
+                            error "DAST PDF INVALID: ${size} bytes"
+                        }
+
+                        echo "✅ PDFs downloaded successfully."
+                    } else {
+                        echo "⚠️ APK_HASH not found. Skipping PDF download."
+                    }
+                }
             }
         }
-    }
-}
 
-stage('Send Email Manual') {
-    steps {
-        writeFile file: 'send_email.ps1', text: '''
+        // ================= SEND EMAIL =================
+        stage('Send Email Manual') {
+            steps {
+                writeFile file: 'send_email.ps1', text: '''
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
 $smtpServer = "smtp.gmail.com"
@@ -314,9 +337,10 @@ $smtp.Timeout = 30000
 
 $smtp.Send($mail)
 '''
-        bat 'powershell -ExecutionPolicy Bypass -File send_email.ps1'
-    }
-}
+                bat 'powershell -ExecutionPolicy Bypass -File send_email.ps1'
+            }
+        }
+
     }
 
     post {
