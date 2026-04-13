@@ -72,17 +72,37 @@ pipeline {
         // ================= BUILD APK =================
         stage('Build APK') {
             steps {
-                bat """
-                flutter pub get
-                flutter build apk --${params.BUILD_TYPE}
-                dir build\\app\\outputs\\flutter-apk
-                """
                 script {
-                    def apkFullPath = "${env.WORKSPACE}\\build\\app\\outputs\\flutter-apk\\app-${params.BUILD_TYPE}.apk"
-                    if (!fileExists(apkFullPath)) {
-                        error "Build APK stage completed but APK not found at: ${apkFullPath}"
+                    // Clean previous build artifacts
+                    bat "if exist build\\app\\outputs\\flutter-apk rmdir /s /q build\\app\\outputs\\flutter-apk"
+
+                    // Run flutter pub get and check exit code
+                    def pubGet = bat(script: 'flutter pub get', returnStatus: true)
+                    if (pubGet != 0) {
+                        error "flutter pub get failed with exit code: ${pubGet}"
                     }
-                    echo "APK successfully built at: ${apkFullPath}"
+
+                    // Run flutter build and check exit code
+                    def buildResult = bat(script: "flutter build apk --${params.BUILD_TYPE} --verbose", returnStatus: true)
+                    if (buildResult != 0) {
+                        error "flutter build apk --${params.BUILD_TYPE} failed with exit code: ${buildResult}"
+                    }
+
+                    // Debug: show full build output directory tree
+                    echo "=== Listing build output directory ==="
+                    bat "if exist build\\app\\outputs dir /s /b build\\app\\outputs || echo build\\app\\outputs does not exist"
+
+                    // Try standard path
+                    def apkFullPath = "${env.WORKSPACE}\\build\\app\\outputs\\flutter-apk\\app-${params.BUILD_TYPE}.apk"
+
+                    // If not found, search entire build folder for any APK
+                    if (!fileExists(apkFullPath)) {
+                        echo "APK not found at standard path, searching entire workspace for APKs..."
+                        bat "dir /s /b \"${env.WORKSPACE}\\build\\*.apk\" || echo No APK files found anywhere in build folder"
+                        error "APK not found at: ${apkFullPath} — check the search results above to find where it was placed."
+                    }
+
+                    echo "✅ APK successfully built at: ${apkFullPath}"
                 }
             }
         }
