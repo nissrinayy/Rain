@@ -73,52 +73,22 @@ pipeline {
         stage('Build APK') {
             steps {
                 bat """
-                echo ====== FLUTTER VERSION ======
-                flutter --version
-                
-                echo ====== CLEAN & DEPENDENCIES ======
-                flutter clean
                 flutter pub get
-                
-                echo ====== GENERATE CODE ======
-                dart run build_runner build
-                
-                echo ====== BUILD APK ======
                 flutter build apk --${params.BUILD_TYPE}
-                
-                echo ====== APK OUTPUT ======
                 dir build\\app\\outputs\\flutter-apk
                 """
             }
         }
-                // ================= VERIFY APK =================
-        stage('Verify APK Build') {
-            steps {
-                bat """
-                echo Checking APK output directory...
-                if exist build\\app\\outputs\\flutter-apk (
-                    echo APK directory found
-                    dir build\\app\\outputs\\flutter-apk
-                ) else (
-                    echo ERROR: APK directory not found
-                    exit /b 1
-                )
-                """
-            }
-        }
+
         // ================= SAST =================
         stage('SAST - Static Analysis (MobSF)') {
             steps {
                 script {
-                    def apkPath = "${WORKSPACE}\\build\\app\\outputs\\flutter-apk\\app-${params.BUILD_TYPE}.apk"
-                    
-                    echo "Checking for APK: ${apkPath}"
-                    
+                    def apkPath = "build/app/outputs/flutter-apk/app-${params.BUILD_TYPE}.apk"
                     if (!fileExists(apkPath)) {
-                        // Coba list files untuk debug
-                        bat "dir \"${WORKSPACE}\\build\\app\\outputs\\flutter-apk\\\" || echo Directory not found"
                         error "APK not found: ${apkPath}"
                     }
+
                     echo "Uploading APK to MobSF (SAST)..."
 
                     def uploadResponse = bat(
@@ -184,8 +154,8 @@ pipeline {
             steps {
                 script {
                     def timestamp  = new Date().format("dd-MM-yyyy_HH-mm-ss")
-                    def sourcePath = "${WORKSPACE}\\build\\app\\outputs\\flutter-apk\\app-${params.BUILD_TYPE}.apk"
-                    def destPath   = "${WORKSPACE}\\apk-outputs\\rain-${params.BUILD_TYPE}-${timestamp}.apk"
+                    def sourcePath = "build\\app\\outputs\\flutter-apk\\app-${params.BUILD_TYPE}.apk"
+                    def destPath   = "apk-outputs\\todo-${params.BUILD_TYPE}-${timestamp}.apk"
 
                     bat "copy \"${sourcePath}\" \"${destPath}\""
 
@@ -260,7 +230,7 @@ pipeline {
                     if (json) {
                         writeFile file: 'dast_report.json', text: json
                         archiveArtifacts artifacts: 'dast_report.json, tls_report.json', allowEmptyArchive: true
-                        echo "✅ DAST Report URL: ${env.MOBSF_URL}/dynamic_analyzer/${env.APK_HASH}/"
+                        echo "✅ DAST Report URL: ${env.MOBSF_URL}/dynamic_report/${env.APK_HASH}/ "
                     }
                 }
             }
@@ -272,48 +242,87 @@ pipeline {
                 bat 'taskkill /F /IM qemu-system-x86_64.exe /T || echo Emulator already stopped'
             }
         }
+stage('Download PDF Report') {
+    steps {
+        script {
+            if (env.APK_HASH) {
 
-        
+                bat """
+                @curl -s -X POST ^
+                -H "Authorization: ${env.MOBSF_TOKEN}" ^
+                --data "hash=${env.APK_HASH}" ^
+                ${env.MOBSF_URL}/api/v1/download_pdf ^
+                -o sast_report.pdf
+                """
+                echo "Downloading DAST PDF (Custom)..."
+                bat """
+                @curl -L -f ^
+                ${env.MOBSF_URL}/dynamic_pdf/${env.APK_HASH}/ ^
+                --output dast_report.pdf --silent --show-error
+                """
 
-    }
+                sleep 2
+ 
 
-    
-    post {
-        always {
-            script {
-                try {
-                    emailext(
-                        subject: "Mobile SAST & DAST Report - Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
-                        body: """Halo tim!
+                bat "dir dast_report.pdf"
+                bat "for %%I in (dast_report.pdf) do @echo Size: %%~zI bytes"
 
-    Build pipeline selesai dengan status: ${currentBuild.currentResult}.
+            } else {
+                echo "APK_HASH not found."
+            }
+            def size = bat(
+                script: '@for %%I in (dast_report.pdf) do @echo %%~zI',
+                returnStdout: true
+            ).trim().split("\\r?\\n")[-1]
 
-    Laporan lengkap SAST dan DAST terlampir dalam format PDF.
-    - SAST: Static Analysis dari MobSF
-    - DAST: Dynamic Analysis dari MobSF
-
-    Terima kasih atas perhatiannya. Semangat audit APK-nya! 💪📱
-
-    Dikirim otomatis dari Jenkins.
-    """,
-                        mimeType: 'text/plain',
-                        to: '$DEFAULT_RECIPIENTS',  // ← Ini penting! Tarik list dari global Default Recipients
-                        attachmentsPattern: 'sast_report.pdf,dast_report.pdf',  // Attach PDF kalau sudah generate
-                        attachLog: true,
-                        compressLog: true,
-                        recipientProviders: []  // Tetap kosong biar gak konflik
-                    )
-                    echo "Email dengan attachment PDF dicoba kirim dari post block."
-                } catch (Exception e) {
-                    echo "Gagal kirim email: ${e.getMessage()}"
-                }
+            if (size.toInteger() < 50000) {
+                error "DAST PDF INVALID: ${size} bytes"
             }
         }
     }
+}
 
+stage('Send Email Manual') {
+    steps {
+        writeFile file: 'send_email.ps1', text: '''
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
+$smtpServer = "smtp.gmail.com"
+$smtpPort = 587
+$from = "syifaamaraqueen@gmail.com"
+$to = "syifaamdh@gmail.com"
+$password = "lyftygsebuyndied"
 
+$mail = New-Object System.Net.Mail.MailMessage
+$mail.From = $from
+$mail.To.Add($to)
+$mail.Subject = "Security Report Jenkins"
+$mail.Body = "Laporan PDF terlampir"
 
+$att1 = New-Object System.Net.Mail.Attachment("sast_report.pdf")
+$att2 = New-Object System.Net.Mail.Attachment("dast_report.pdf")
 
+$mail.Attachments.Add($att1)
+$mail.Attachments.Add($att2)
 
+$smtp = New-Object System.Net.Mail.SmtpClient($smtpServer, $smtpPort)
+$smtp.EnableSsl = $true
+$smtp.UseDefaultCredentials = $false
+$smtp.Credentials = New-Object System.Net.NetworkCredential($from, $password)
+$smtp.DeliveryMethod = [System.Net.Mail.SmtpDeliveryMethod]::Network
+$smtp.Timeout = 30000
+
+$smtp.Send($mail)
+'''
+        bat 'powershell -ExecutionPolicy Bypass -File send_email.ps1'
+    }
+}
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'apk-outputs/*.apk', allowEmptyArchive: true
+            archiveArtifacts artifacts: '*.pdf', allowEmptyArchive: true
+        }
+    }
 }
