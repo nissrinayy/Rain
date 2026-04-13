@@ -31,7 +31,7 @@ pipeline {
         ANDROID_HOME     = "C:\\Users\\Nisrina\\AppData\\Local\\Android\\Sdk"
         ANDROID_SDK_ROOT = "${ANDROID_HOME}"
         FLUTTER_HOME     = "D:\\MobDev\\Flutter SDK\\flutter"
-        JAVA_HOME        = "C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.17.10-hotspot"
+        JAVA_HOME = "C:\\Program Files\\Android\\Android Studio\\jbr"
 
         PATH = "${FLUTTER_HOME}\\bin;${JAVA_HOME}\\bin;${ANDROID_HOME}\\platform-tools;${ANDROID_HOME}\\emulator;${env.PATH}"
 
