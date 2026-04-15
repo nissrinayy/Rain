@@ -8,7 +8,6 @@ import 'package:rain/app/controller/controller.dart';
 import 'package:rain/app/data/db.dart';
 import 'package:rain/app/ui/places/view/place_list.dart';
 import 'package:rain/app/ui/places/widgets/place_action.dart';
-import 'package:rain/app/ui/geolocation.dart';
 import 'package:rain/app/ui/main/view/main_page.dart';
 import 'package:rain/app/ui/map/view/map.dart';
 import 'package:rain/app/ui/settings/view/settings.dart';
@@ -233,14 +232,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     appBar: AppBar(
       centerTitle: true,
       automaticallyImplyLeading: false,
-      leading: tabIndex == 0
-          ? IconButton(
-              onPressed: () => NavigationHelper.toDownToUp(
-                () => const SelectGeolocation(isStart: false),
-              ),
-              icon: const Icon(IconsaxPlusLinear.global_search, size: 18),
-            )
-          : null,
+      leading: null,  // Location is hardcoded - no need to change
       title: _buildAppBarTitle(
         tabIndex,
         context.textTheme.titleMedium?.copyWith(
